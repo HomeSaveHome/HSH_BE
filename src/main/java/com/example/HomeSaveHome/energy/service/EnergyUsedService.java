@@ -69,29 +69,20 @@ public class EnergyUsedService {
     }
 
     // 연도별 총 사용량과 가격 계산
-    public YearlyEnergyUsedResponse getYearlyEnergyUsed(Long userId, Long energyId, int year) {
-        if (userId == null || userId <= 0) {
-            throw new IllegalArgumentException("잘못된 유저입니다.");
-        }
-        if (energyId == null || energyId <= 0) {
-            throw new IllegalArgumentException("잘못된 에너지입니다.");
-        }
+    public List<YearlyEnergyUsedResponse> getYearlyEnergyUsed(Long userId, Long energyId) {
+        Energy energy = energyRepository.findById(energyId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 에너지 타입을 찾을 수 없습니다."));
 
-        try {
-            List<Object[]> results = energyUsedRepository.getYearlyEnergyUsedAndPrice(userId, energyId, year);
+        List<Object[]> results = energyUsedRepository.getYearlyEnergyUsed(userId, energyId);
 
-            if (results.isEmpty()) {
-                return new YearlyEnergyUsedResponse(energyId, year, 0.0, 0L);
-            }
-
-            Object[] result = results.get(0);
-            double totalAmount = ((Number) result[0]).doubleValue();
-            long totalPrice = ((Number) result[1]).longValue();
-
-            return new YearlyEnergyUsedResponse(energyId, year, totalAmount, totalPrice);
-        } catch (Exception e) {
-            throw new RuntimeException("연간 에너지 사용량 조회 중 예상치 못한 오류가 발생했습니다.", e);
-        }
+        return results.stream()
+                .map(result -> new YearlyEnergyUsedResponse(
+                        (String) result[0],
+                        (int) result[1],
+                        ((Number) result[2]).doubleValue(),
+                        ((Number) result[3]).longValue()
+                ))
+                .collect(Collectors.toList());
 
     }
 

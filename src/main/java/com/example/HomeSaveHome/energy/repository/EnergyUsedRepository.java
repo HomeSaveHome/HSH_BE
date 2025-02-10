@@ -11,12 +11,13 @@ import java.util.List;
 public interface EnergyUsedRepository extends JpaRepository<EnergyUsed, Long> {
     List<EnergyUsed> findByUserIdAndEnergy_Id(Long userId, Long energyId);
 
-    @Query("SELECT COALESCE(SUM(e.amount), 0), COALESCE(SUM(e.price), 0) " +
+    @Query("SELECT e.energy.energyName, e.year, SUM(e.amount), SUM(e.price) " +
             "FROM EnergyUsed e " +
-            "WHERE e.userId = :userId AND e.energy.id = :energyId AND e.year = :year")
-    List<Object[]> getYearlyEnergyUsedAndPrice(@Param("userId") Long userId,
-                                         @Param("energyId") Long energyId,
-                                         @Param("year") int year);
+            "WHERE e.userId = :userId AND e.energy.id = :energyId " +
+            "GROUP BY e.year " +
+            "ORDER BY e.year ASC")
+    List<Object[]> getYearlyEnergyUsed(@Param("userId") Long userId,
+                                       @Param("energyId") Long energyId);
 
 
     List<EnergyUsed> findByUserIdAndEnergyAndMonth(Long userId, Energy energy, int month);
