@@ -1,5 +1,6 @@
 package com.example.HomeSaveHome.energy.repository;
 
+import com.example.HomeSaveHome.energy.entity.Energy;
 import com.example.HomeSaveHome.energy.entity.EnergyUsed;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,7 @@ public interface EnergyUsedRepository extends JpaRepository<EnergyUsed, Long> {
     List<Object[]> getYearlyEnergyUsedAndPrice(@Param("userId") Long userId,
                                          @Param("energyId") Long energyId,
                                          @Param("year") int year);
+
+
+    List<EnergyUsed> findByUserIdAndEnergyAndMonth(Long userId, Energy energy, int month);
 }

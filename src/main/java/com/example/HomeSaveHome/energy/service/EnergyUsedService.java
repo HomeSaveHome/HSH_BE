@@ -1,6 +1,7 @@
 package com.example.HomeSaveHome.energy.service;
 
 import com.example.HomeSaveHome.energy.dto.EnergyUsedResponse;
+import com.example.HomeSaveHome.energy.dto.MonthlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.entity.Energy;
 import com.example.HomeSaveHome.energy.entity.EnergyUsed;
@@ -92,5 +93,28 @@ public class EnergyUsedService {
             throw new RuntimeException("연간 에너지 사용량 조회 중 예상치 못한 오류가 발생했습니다.", e);
         }
 
+    }
+
+    // 특정 월 에너지 사용량 조회
+    public List<MonthlyEnergyUsedResponse> getEnergyUsedByMonth(Long userId, Long energyId, int month) {
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("월은 1~12 사이의 값이어야 합니다.");
+        }
+
+        Energy energy = energyRepository.findById(energyId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 에너지 타입을 찾을 수 없습니다."));
+
+        List<EnergyUsed> energyUsedList = energyUsedRepository.findByUserIdAndEnergyAndMonth(userId, energy, month);
+
+        return energyUsedList.stream()
+                .map(e -> new MonthlyEnergyUsedResponse(
+                        e.getId(),
+                        e.getEnergy().getEnergyName(),
+                        e.getYear(),
+                        e.getMonth(),
+                        e.getAmount(),
+                        e.getPrice()
+                ))
+                .collect(Collectors.toList());
     }
 }

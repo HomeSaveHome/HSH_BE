@@ -2,6 +2,7 @@ package com.example.HomeSaveHome.energy.controller;
 
 import com.example.HomeSaveHome.energy.dto.EnergyUsedRequest;
 import com.example.HomeSaveHome.energy.dto.EnergyUsedResponse;
+import com.example.HomeSaveHome.energy.dto.MonthlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.service.EnergyUsedService;
 import org.springframework.http.ResponseEntity;
@@ -51,4 +52,13 @@ public class EnergyUsedController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/monthly")
+    public ResponseEntity<List<MonthlyEnergyUsedResponse>> getMonthlyEnergyUsed(
+            @RequestParam Long energyId,
+            @RequestParam int month) {
+        Long userId = 1L;  // 개발용 userId
+
+        List<MonthlyEnergyUsedResponse> response = energyUsedService.getEnergyUsedByMonth(userId, energyId, month);
+        return ResponseEntity.ok(response);
+    }
 }
