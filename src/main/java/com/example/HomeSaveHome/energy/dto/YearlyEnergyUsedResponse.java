@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class YearlyEnergyUsedResponse {
-    private Long energyId;
+    private String energyName;
     private int year;
     private double totalAmount;
     private Long totalPrice;

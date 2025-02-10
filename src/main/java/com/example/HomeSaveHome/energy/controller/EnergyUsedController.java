@@ -43,12 +43,11 @@ public class EnergyUsedController {
     }
 
     @GetMapping("/yearly")
-    public ResponseEntity<YearlyEnergyUsedResponse> getYearlyEnergyUsed(
-            @RequestParam Long energyId,
-            @RequestParam int year) {
+    public ResponseEntity<List<YearlyEnergyUsedResponse>> getYearlyEnergyUsed(
+            @RequestParam Long energyId) {
         Long userId = 1L;  // 개발용 userId (임시)
 
-        YearlyEnergyUsedResponse response = energyUsedService.getYearlyEnergyUsed(userId, energyId, year);
+        List<YearlyEnergyUsedResponse> response = energyUsedService.getYearlyEnergyUsed(userId, energyId);
         return ResponseEntity.ok(response);
     }
 
