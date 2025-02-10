@@ -1,6 +1,7 @@
 package com.example.HomeSaveHome.energy.service;
 
 import com.example.HomeSaveHome.energy.dto.EnergyUsedResponse;
+import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.entity.Energy;
 import com.example.HomeSaveHome.energy.entity.EnergyUsed;
 import com.example.HomeSaveHome.energy.repository.EnergyRepository;
@@ -51,7 +52,7 @@ public class EnergyUsedService {
         );
     }
 
-    public List<EnergyUsedResponse> getEnergyUsageByUserAndEnergyId(Long userId, Long energyId) {
+    public List<EnergyUsedResponse> getEnergyUsedByUserAndEnergyId(Long userId, Long energyId) {
         List<EnergyUsed> energyUsedList = energyUsedRepository.findByUserIdAndEnergy_Id(userId, energyId);
 
         return energyUsedList.stream()
@@ -64,5 +65,32 @@ public class EnergyUsedService {
                         energyUsed.getPrice()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    // 연도별 총 사용량과 가격 계산
+    public YearlyEnergyUsedResponse getYearlyEnergyUsed(Long userId, Long energyId, int year) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("잘못된 유저입니다.");
+        }
+        if (energyId == null || energyId <= 0) {
+            throw new IllegalArgumentException("잘못된 에너지입니다.");
+        }
+
+        try {
+            List<Object[]> results = energyUsedRepository.getYearlyEnergyUsedAndPrice(userId, energyId, year);
+
+            if (results.isEmpty()) {
+                return new YearlyEnergyUsedResponse(energyId, year, 0.0, 0L);
+            }
+
+            Object[] result = results.get(0);
+            double totalAmount = ((Number) result[0]).doubleValue();
+            long totalPrice = ((Number) result[1]).longValue();
+
+            return new YearlyEnergyUsedResponse(energyId, year, totalAmount, totalPrice);
+        } catch (Exception e) {
+            throw new RuntimeException("연간 에너지 사용량 조회 중 예상치 못한 오류가 발생했습니다.", e);
+        }
+
     }
 }
