@@ -2,6 +2,7 @@ package com.example.HomeSaveHome.energy.controller;
 
 import com.example.HomeSaveHome.energy.dto.EnergyUsedRequest;
 import com.example.HomeSaveHome.energy.dto.EnergyUsedResponse;
+import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.service.EnergyUsedService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,8 +36,19 @@ public class EnergyUsedController {
             @PathVariable Long energyId) {
 
         Long userId = 1L;  // 개발용 userId (임시)
-        List<EnergyUsedResponse> energyUsedResponses = energyUsedService.getEnergyUsageByUserAndEnergyId(userId, energyId);
+        List<EnergyUsedResponse> energyUsedResponses = energyUsedService.getEnergyUsedByUserAndEnergyId(userId, energyId);
 
         return ResponseEntity.ok(energyUsedResponses);
     }
+
+    @GetMapping("/yearly")
+    public ResponseEntity<YearlyEnergyUsedResponse> getYearlyEnergyUsed(
+            @RequestParam Long energyId,
+            @RequestParam int year) {
+        Long userId = 1L;  // 개발용 userId (임시)
+
+        YearlyEnergyUsedResponse response = energyUsedService.getYearlyEnergyUsed(userId, energyId, year);
+        return ResponseEntity.ok(response);
+    }
+
 }
