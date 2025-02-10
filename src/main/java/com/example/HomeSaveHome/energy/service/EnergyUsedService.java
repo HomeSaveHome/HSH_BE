@@ -7,7 +7,9 @@ import com.example.HomeSaveHome.energy.repository.EnergyRepository;
 import com.example.HomeSaveHome.energy.repository.EnergyUsedRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EnergyUsedService {
@@ -47,5 +49,20 @@ public class EnergyUsedService {
                 saved.getId(), saved.getEnergy().getId(), saved.getYear(),
                 saved.getMonth(), saved.getAmount(), saved.getPrice()
         );
+    }
+
+    public List<EnergyUsedResponse> getEnergyUsageByUserAndEnergyId(Long userId, Long energyId) {
+        List<EnergyUsed> energyUsedList = energyUsedRepository.findByUserIdAndEnergy_Id(userId, energyId);
+
+        return energyUsedList.stream()
+                .map(energyUsed -> new EnergyUsedResponse(
+                        energyUsed.getId(),
+                        energyUsed.getEnergy().getId(),
+                        energyUsed.getYear(),
+                        energyUsed.getMonth(),
+                        energyUsed.getAmount(),
+                        energyUsed.getPrice()
+                ))
+                .collect(Collectors.toList());
     }
 }
