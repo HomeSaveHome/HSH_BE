@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.example.HomeSaveHome.BulletinBoard.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

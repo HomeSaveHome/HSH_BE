@@ -5,7 +5,7 @@
                  version="3.0">
     <named-native-query
             name="Comment.findByNickname"
-            result-class="com.example.demo.entity.Comment">
+            result-class="com.example.HomeSaveHome.BulletinBoard.entity.Comment">
         <query>
             <![CDATA[
                 SELECT * FROM comment WHERE nickname = :nickname

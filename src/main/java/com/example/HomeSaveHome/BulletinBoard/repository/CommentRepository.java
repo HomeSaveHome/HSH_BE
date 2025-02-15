@@ -1,6 +1,6 @@
-package com.example.demo.repository;
+package com.example.HomeSaveHome.BulletinBoard.repository;
 
-import com.example.demo.entity.Comment;
+import com.example.HomeSaveHome.BulletinBoard.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

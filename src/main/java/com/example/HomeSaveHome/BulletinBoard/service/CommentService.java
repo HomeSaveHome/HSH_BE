@@ -1,10 +1,10 @@
-package com.example.demo.service;
+package com.example.HomeSaveHome.BulletinBoard.service;
 
-import com.example.demo.dto.CommentDto;
-import com.example.demo.entity.Article;
-import com.example.demo.entity.Comment;
-import com.example.demo.repository.ArticleRepository;
-import com.example.demo.repository.CommentRepository;
+import com.example.HomeSaveHome.BulletinBoard.dto.CommentDto;
+import com.example.HomeSaveHome.BulletinBoard.entity.Article;
+import com.example.HomeSaveHome.BulletinBoard.entity.Comment;
+import com.example.HomeSaveHome.BulletinBoard.repository.ArticleRepository;
+import com.example.HomeSaveHome.BulletinBoard.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

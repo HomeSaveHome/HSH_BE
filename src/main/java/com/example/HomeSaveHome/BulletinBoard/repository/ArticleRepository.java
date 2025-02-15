@@ -1,6 +1,6 @@
-package com.example.demo.repository;
+package com.example.HomeSaveHome.BulletinBoard.repository;
 
-import com.example.demo.entity.Article;
+import com.example.HomeSaveHome.BulletinBoard.entity.Article;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.ArrayList;

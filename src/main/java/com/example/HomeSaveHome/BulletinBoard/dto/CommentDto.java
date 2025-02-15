@@ -1,6 +1,6 @@
-package com.example.demo.dto;
+package com.example.HomeSaveHome.BulletinBoard.dto;
 
-import com.example.demo.entity.Comment;
+import com.example.HomeSaveHome.BulletinBoard.entity.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

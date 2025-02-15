@@ -1,10 +1,10 @@
-package com.example.demo.controller;
+package com.example.HomeSaveHome.BulletinBoard.controller;
 
-import com.example.demo.dto.ArticleForm;
-import com.example.demo.dto.CommentDto;
-import com.example.demo.entity.Article;
-import com.example.demo.repository.ArticleRepository;
-import com.example.demo.service.CommentService;
+import com.example.HomeSaveHome.BulletinBoard.dto.ArticleForm;
+import com.example.HomeSaveHome.BulletinBoard.dto.CommentDto;
+import com.example.HomeSaveHome.BulletinBoard.entity.Article;
+import com.example.HomeSaveHome.BulletinBoard.repository.ArticleRepository;
+import com.example.HomeSaveHome.BulletinBoard.service.CommentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

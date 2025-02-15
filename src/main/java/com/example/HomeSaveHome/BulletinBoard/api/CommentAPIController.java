@@ -1,7 +1,7 @@
-package com.example.demo.api;
+package com.example.HomeSaveHome.BulletinBoard.api;
 
-import com.example.demo.dto.CommentDto;
-import com.example.demo.service.CommentService;
+import com.example.HomeSaveHome.BulletinBoard.dto.CommentDto;
+import com.example.HomeSaveHome.BulletinBoard.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

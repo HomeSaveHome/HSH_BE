@@ -1,6 +1,6 @@
-package com.example.demo.service;
+package com.example.HomeSaveHome.BulletinBoard.service;
 
-import com.example.demo.repository.ArticleRepository;
+import com.example.HomeSaveHome.BulletinBoard.repository.ArticleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

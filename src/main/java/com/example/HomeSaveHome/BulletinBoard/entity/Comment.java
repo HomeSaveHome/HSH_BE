@@ -1,7 +1,7 @@
-package com.example.demo.entity;
+package com.example.HomeSaveHome.BulletinBoard.entity;
 
 
-import com.example.demo.dto.CommentDto;
+import com.example.HomeSaveHome.BulletinBoard.dto.CommentDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

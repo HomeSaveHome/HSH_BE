@@ -1,6 +1,6 @@
-package com.example.demo.dto;
+package com.example.HomeSaveHome.BulletinBoard.dto;
 
-import com.example.demo.entity.Article;
+import com.example.HomeSaveHome.BulletinBoard.entity.Article;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
 
