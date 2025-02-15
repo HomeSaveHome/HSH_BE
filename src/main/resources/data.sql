@@ -5,6 +5,7 @@ INSERT INTO article(title, content) VALUES ('What is your favorite movie?', 'Ple
 INSERT INTO article(title, content) VALUES ('What is your favorite food?', 'Please leave a comment below 2');
 INSERT INTO article(title, content) VALUES ('What is your hobby?', 'Please leave a comment below 3');
 
+
 INSERT INTO comment(article_id, nickname, body) VALUES (4, 'Park', 'The Shawshank Redemption');
 INSERT INTO comment(article_id, nickname, body) VALUES (4, 'Kim', 'The Godfather');
 INSERT INTO comment(article_id, nickname, body) VALUES (4, 'Choi', 'The Great Gatsby');
