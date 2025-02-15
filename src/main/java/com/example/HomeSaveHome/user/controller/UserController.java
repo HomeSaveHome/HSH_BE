@@ -1,7 +1,7 @@
-package com.example.HomeSaveHome.controller;
+package com.example.HomeSaveHome.user.controller;
 
-import com.example.HomeSaveHome.model.User;
-import com.example.HomeSaveHome.service.UserService;
+import com.example.HomeSaveHome.user.model.User;
+import com.example.HomeSaveHome.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

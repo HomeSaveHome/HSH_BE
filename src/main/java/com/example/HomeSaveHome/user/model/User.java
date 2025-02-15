@@ -1,4 +1,4 @@
-package com.example.HomeSaveHome.model;
+package com.example.HomeSaveHome.user.model;
 
 public class User {
     private String username;
