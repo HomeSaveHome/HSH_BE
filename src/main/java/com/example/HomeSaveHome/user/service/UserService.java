@@ -1,7 +1,7 @@
-package com.example.HomeSaveHome.service;
+package com.example.HomeSaveHome.user.service;
 // 실제 DB에 저장된 로직을 여기에 작성
 
-import com.example.HomeSaveHome.model.User;
+import com.example.HomeSaveHome.user.model.User;
 import org.springframework.stereotype.Service;
 
 @Service
