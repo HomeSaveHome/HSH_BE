@@ -5,6 +5,8 @@ import com.example.HomeSaveHome.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -13,10 +15,18 @@ public class UserService {
 
     // 회원가입 처리 메서드
     public boolean registerUser(User user) {
+        // 사용자명 중복 체크
         User existingUser = userRepository.findByUsername(user.getUsername());
         if (existingUser != null) {
             return false;  // 이미 존재하는 사용자 이름
         }
+
+        // 이메일 중복 체크
+        existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser != null) {
+            return false;  // 이미 존재하는 이메일
+        }
+
         userRepository.save(user);  // 새로운 사용자 저장
         return true;
     }
@@ -45,17 +55,22 @@ public class UserService {
             existingUser.setLevel(user.getLevel());
             return userRepository.save(existingUser);  // 업데이트된 사용자 저장
         }
-        return null;
+        return null;  // 사용자 존재하지 않으면 null 반환
     }
 
     // 사용자 삭제
     public boolean deleteUser(Long userId) {
-        userRepository.deleteById(userId);  // ID로 사용자 삭제
-        return true;
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isPresent()) {
+            userRepository.delete(user.get());  // ID로 사용자 삭제
+            return true;
+        }
+        return false;  // 사용자가 존재하지 않으면 삭제 실패
     }
 
     // ID로 사용자 조회
     public User getUserById(Long userId) {
+        // Optional을 사용하여 사용자 존재 여부 확인
         return userRepository.findById(userId).orElse(null);  // ID로 사용자 조회
     }
 }
