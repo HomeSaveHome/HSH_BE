@@ -41,7 +41,8 @@ public class EnergyUsedService {
         }
 
         EnergyUsed energyUsed = EnergyUsed.builder()
-                .userId(userId)
+                .user(userRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("해당 유저가 존재하지 않습니다.")))
                 .energy(energy.get())
                 .year(year)
                 .month(month)
