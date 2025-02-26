@@ -3,6 +3,3 @@ spring:
     active: local
     group:
       local: db
-  sql:
-    init:
-      mode: always
