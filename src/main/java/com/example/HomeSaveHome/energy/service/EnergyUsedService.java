@@ -59,7 +59,7 @@ public class EnergyUsedService {
     }
 
     public List<EnergyUsedResponse> getEnergyUsedByUserAndEnergyId(Long userId, Long energyId) {
-        List<EnergyUsed> energyUsedList = energyUsedRepository.findByUserIdAndEnergy_Id(userId, energyId);
+        List<EnergyUsed> energyUsedList = energyUsedRepository.findByUserIdAndEnergyId(userId, energyId);
 
         return energyUsedList.stream()
                 .map(energyUsed -> new EnergyUsedResponse(
@@ -104,9 +104,9 @@ public class EnergyUsedService {
         if (energyId != null) {
             Energy energy = energyRepository.findById(energyId)
                     .orElseThrow(() -> new IllegalArgumentException("해당 에너지 타입을 찾을 수 없습니다."));
-            energyUsedList = energyUsedRepository.findByUserIdAndEnergyAndMonthAndYear(user, energy, month, year);
+            energyUsedList = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, energy, month, year);
         } else {
-            energyUsedList = energyUsedRepository.findByUserIdAndEnergyAndMonthAndYear(user, null, month, year);
+            energyUsedList = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, null, month, year);
         }
 
         return energyUsedList.stream()
