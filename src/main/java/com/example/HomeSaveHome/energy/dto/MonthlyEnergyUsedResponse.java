@@ -2,9 +2,11 @@ package com.example.HomeSaveHome.energy.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class MonthlyEnergyUsedResponse {
     private Long id;
     private String energyName;
