@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사용자 상세 정보</title>
+</head>
+<body>
+<h1>사용자 상세 정보</h1>
+
+<div>
+    <p>아이디: <span th:text="${user.username}">[아이디]</span></p>
+    <p>이메일: <span th:text="${user.email}">[이메일]</span></p>
+    <p>이름: <span th:text="${user.name}">[이름]</span></p>
+</div>
+
+<div>
+    <a href="/users/me">내 프로필 보기</a>
+    <a href="/users/logout">로그아웃</a>
+</div>
+</body>
+</html>
