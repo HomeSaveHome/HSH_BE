@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller  // @RestController -> @Controller로 변경
+@Controller
 @RequestMapping("/users")
 public class UserController {
 
@@ -21,16 +21,9 @@ public class UserController {
         if (isSuccess) {
             model.addAttribute("message", "회원가입 성공!");
         } else {
-            model.addAttribute("message", "회원가입 실패!");
+            model.addAttribute("message", "회원가입 실패! 이미 존재하는 사용자 이름 또는 이메일입니다.");
         }
-        // 회원가입 결과 페이지로 리다이렉트
-        return "users/result";  // /src/main/resources/templates/result.html로 렌더링
-    }
-
-    // GET 방식 : 회원가입 페이지 제공 (나중에 제거해야할 것)
-    @GetMapping("/signup")
-    public String getSignupForm() {
-        return "users/signup";  // /src/main/resources/templates/signup.html로 렌더링
+        return "users/result";  // 결과 페이지
     }
 
     // POST 방식 : 로그인 처리
@@ -38,72 +31,49 @@ public class UserController {
     public String login(@RequestParam String username, @RequestParam String password, Model model) {
         boolean isSuccess = userService.authenticateUser(username, password);
         if (isSuccess) {
-            return "redirect:/users/me";  // Redirect to profile page
+            return "로그인 성공"; // 로그인 성공 메시지
         } else {
-            model.addAttribute("message", "로그인 실패!");
-            return "users/result"; // Show failure message
+            return "로그인 실패! 사용자명이나 비밀번호를 확인해주세요."; // 실패 메시지
         }
     }
 
-    // GET 방식 : 로그인 페이지 제공 (나중에 프론트랑 합칠 때 제거할 예정)
-    @GetMapping("/login")
-    public String getLoginForm() {
-        return "users/login";
-    }
-
-    @PostMapping("/logout")
-    public String logout(Model model) {
-        boolean isSuccess = userService.logoutUser();
-        if (isSuccess) {
-            model.addAttribute("message", "로그아웃 성공!");
-        }
-        else {
-            model.addAttribute("message", "로그아웃 실패!");
-        }
-        return "users/result"; // 나중에 리액트로 연결해야할 것.
-    }
-
-    @GetMapping("/me")
-    public String getProfile(Model model) {
-        User currentUser = userService.getCurrentUser();
-        model.addAttribute("user", currentUser);
-        return "users/profile"; // 프로필 페이지 (profile.html) 렌더링
-    }
-
-    @PutMapping("/me")
-    public String updateProfile(@ModelAttribute User user, Model model) {
-        User updatedUser = userService.updateUserProfile(user);
-        if (updatedUser != null) {
-            model.addAttribute("user", updatedUser);
-            model.addAttribute("message", "프로필 수정 성공!");
-        } else {
-            model.addAttribute("message", "프로필 수정 실패!");
-        }
-        return "users/result"; // 결과 페이지로 리다이렉트
-    }
-
-    @DeleteMapping("/me")
-    public String deleteUser(Model model) {
-        boolean isDeleted = userService.deleteUser();
-        if (isDeleted) {
-            model.addAttribute("message", "회원 탈퇴 성공!");
-        } else {
-            model.addAttribute("message", "회원 탈퇴 실패!");
-        }
-        return "users/result"; // 결과 페이지로 리다이렉트
-    }
-
-    @GetMapping("/{userid}")
-    public String getUserById(@PathVariable("userid") String userid, Model model) {
-        User user = userService.getUserById(userid);
+    // GET 방식 : ID로 사용자 조회
+    @GetMapping("/{userId}")
+    public String getUserById(@PathVariable("userId") Long userId, Model model) {
+        User user = userService.getUserById(userId);
         if (user != null) {
             model.addAttribute("user", user);
-            return "users/userDetail"; // 사용자 상세 정보 페이지 (userDetail.html) 렌더링
+            return "users/userDetail"; // 사용자 상세 정보 페이지
         } else {
             model.addAttribute("message", "사용자를 찾을 수 없습니다.");
             return "users/result";
         }
     }
 
-}
+    // 프로필 수정
+    @PostMapping("/updateProfile")
+    public String updateProfile(@ModelAttribute User user, Model model) {
+        User updatedUser = userService.updateUserProfile(user);
+        if (updatedUser != null) {
+            model.addAttribute("message", "프로필이 성공적으로 업데이트되었습니다.");
+            model.addAttribute("user", updatedUser);
+        } else {
+            model.addAttribute("message", "프로필 업데이트 실패! 사용자 정보를 확인해주세요.");
+        }
+        return "users/result"; // 결과 페이지
+    }
 
+    // 사용자 삭제
+    @PostMapping("/delete/{userId}")
+    public String deleteUser(@PathVariable("userId") Long userId, Model model) {
+        boolean isDeleted = userService.deleteUser(userId);
+        if (isDeleted) {
+            model.addAttribute("message", "사용자가 삭제되었습니다.");
+        } else {
+            model.addAttribute("message", "사용자를 찾을 수 없거나 삭제 실패.");
+        }
+        return "users/result"; // 결과 페이지
+    }
+
+    // 기타 메서드들 (프로필 수정, 삭제 등)
+}
