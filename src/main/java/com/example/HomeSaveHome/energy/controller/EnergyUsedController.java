@@ -6,12 +6,17 @@ import com.example.HomeSaveHome.energy.dto.MonthlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.service.EnergyUsedService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.YearMonth;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/energyUsed")
+@RequestMapping("/energyUsed")
 public class EnergyUsedController {
 
     private final EnergyUsedService energyUsedService;
@@ -59,5 +64,25 @@ public class EnergyUsedController {
 
         List<MonthlyEnergyUsedResponse> response = energyUsedService.getEnergyUsedByMonth(userId, energyId, month);
         return ResponseEntity.ok(response);
+    }
+
+    // 최근 4개월 에너지 사용량 조회
+    @GetMapping("/usage-analytics")
+    public String getLast4MonthEnergy(@RequestParam Long userId, Model model) {
+        Map<String, Map<String, MonthlyEnergyUsedResponse>> usageAnalytics = energyUsedService.getLast4MonthsEnergy(userId);
+
+        int maxGasPrice = usageAnalytics.values().stream()
+                .mapToInt(data -> data.getOrDefault("gas", new MonthlyEnergyUsedResponse()).getPrice().intValue())
+                .max().orElse(1);
+
+        int maxElectricPrice = usageAnalytics.values().stream()
+                .mapToInt(data -> data.getOrDefault("electric", new MonthlyEnergyUsedResponse()).getPrice().intValue())
+                .max().orElse(1);
+
+        model.addAttribute("usageAnalytics", usageAnalytics);
+        model.addAttribute("maxGasPrice", maxGasPrice);
+        model.addAttribute("maxElectricPrice", maxElectricPrice);
+
+        return "main";
     }
 }

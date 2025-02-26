@@ -5,12 +5,14 @@ import com.example.HomeSaveHome.energy.dto.MonthlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.entity.Energy;
 import com.example.HomeSaveHome.energy.entity.EnergyUsed;
+import com.example.HomeSaveHome.user.model.User;
 import com.example.HomeSaveHome.energy.repository.EnergyRepository;
 import com.example.HomeSaveHome.energy.repository.EnergyUsedRepository;
+import com.example.HomeSaveHome.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.YearMonth;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,10 +20,12 @@ public class EnergyUsedService {
 
     private final EnergyUsedRepository energyUsedRepository;
     private final EnergyRepository energyRepository;
+    private final UserRepository userRepository;
 
-    public EnergyUsedService(EnergyUsedRepository energyUsedRepository, EnergyRepository energyRepository) {
+    public EnergyUsedService(EnergyUsedRepository energyUsedRepository, EnergyRepository energyRepository, UserRepository userRepository) {
         this.energyUsedRepository = energyUsedRepository;
         this.energyRepository = energyRepository;
+        this.userRepository = userRepository;
     }
 
     // 에너지 사용량 입력
@@ -87,15 +91,22 @@ public class EnergyUsedService {
     }
 
     // 특정 월 에너지 사용량 조회
-    public List<MonthlyEnergyUsedResponse> getEnergyUsedByMonth(Long userId, Long energyId, int month) {
+    public List<MonthlyEnergyUsedResponse> getEnergyUsedByMonth(Long userId, Long energyId, int month, int year) {
         if (month < 1 || month > 12) {
             throw new IllegalArgumentException("월은 1~12 사이의 값이어야 합니다.");
         }
 
-        Energy energy = energyRepository.findById(energyId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 에너지 타입을 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
-        List<EnergyUsed> energyUsedList = energyUsedRepository.findByUserIdAndEnergyAndMonth(userId, energy, month);
+        List<EnergyUsed> energyUsedList;
+        if (energyId != null) {
+            Energy energy = energyRepository.findById(energyId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 에너지 타입을 찾을 수 없습니다."));
+            energyUsedList = energyUsedRepository.findByUserIdAndEnergyAndMonthAndYear(user, energy, month, year);
+        } else {
+            energyUsedList = energyUsedRepository.findByUserIdAndEnergyAndMonthAndYear(user, null, month, year);
+        }
 
         return energyUsedList.stream()
                 .map(e -> new MonthlyEnergyUsedResponse(
@@ -107,5 +118,28 @@ public class EnergyUsedService {
                         e.getPrice()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    // 최근 4개월 간의 에너지 사용량 조회
+    public Map<String, Map<String, MonthlyEnergyUsedResponse>> getLast4MonthsEnergy(Long userId) {
+        YearMonth currentMonth = YearMonth.now();
+        Map<String, Map<String, MonthlyEnergyUsedResponse>> last4MonthsEnergy = new LinkedHashMap<>();
+
+        for (int i = 1; i <= 4; i++) {
+            YearMonth targetMonth = currentMonth.minusMonths(i);
+            int monthValue = targetMonth.getMonthValue();
+            int yearValue = targetMonth.getYear();
+
+            List<MonthlyEnergyUsedResponse> responseList = getEnergyUsedByMonth(userId, null, monthValue, yearValue);
+
+            Map<String, MonthlyEnergyUsedResponse> monthData = new HashMap<>();
+            for (MonthlyEnergyUsedResponse response : responseList) {
+                monthData.put(response.getEnergyName(), response);
+            }
+
+            last4MonthsEnergy.put(targetMonth.getMonth().toString().substring(0, 3), monthData);
+        }
+
+        return last4MonthsEnergy;
     }
 }
