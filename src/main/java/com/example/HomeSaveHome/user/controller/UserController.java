@@ -24,30 +24,31 @@ public class UserController {
             model.addAttribute("message", "회원가입 실패!");
         }
         // 회원가입 결과 페이지로 리다이렉트
-        return "result";  // /src/main/resources/templates/result.html로 렌더링
+        return "users/result";  // /src/main/resources/templates/result.html로 렌더링
     }
 
     // GET 방식 : 회원가입 페이지 제공 (나중에 제거해야할 것)
     @GetMapping("/signup")
     public String getSignupForm() {
-        return "/signup";  // /src/main/resources/templates/signup.html로 렌더링
+        return "users/signup";  // /src/main/resources/templates/signup.html로 렌더링
     }
 
     // POST 방식 : 로그인 처리
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password) {
+    public String login(@RequestParam String username, @RequestParam String password, Model model) {
         boolean isSuccess = userService.authenticateUser(username, password);
         if (isSuccess) {
-            return "로그인 성공";
+            return "redirect:/users/me";  // Redirect to profile page
         } else {
-            return "로그인 실패!";
+            model.addAttribute("message", "로그인 실패!");
+            return "users/result"; // Show failure message
         }
     }
 
     // GET 방식 : 로그인 페이지 제공 (나중에 프론트랑 합칠 때 제거할 예정)
     @GetMapping("/login")
     public String getLoginForm() {
-        return "/login";
+        return "users/login";
     }
 
     @PostMapping("/logout")
@@ -59,14 +60,14 @@ public class UserController {
         else {
             model.addAttribute("message", "로그아웃 실패!");
         }
-        return "layout/result"; // 나중에 리액트로 연결해야할 것.
+        return "users/result"; // 나중에 리액트로 연결해야할 것.
     }
 
     @GetMapping("/me")
     public String getProfile(Model model) {
         User currentUser = userService.getCurrentUser();
         model.addAttribute("user", currentUser);
-        return "/profile"; // 프로필 페이지 (profile.html) 렌더링
+        return "users/profile"; // 프로필 페이지 (profile.html) 렌더링
     }
 
     @PutMapping("/me")
@@ -78,7 +79,7 @@ public class UserController {
         } else {
             model.addAttribute("message", "프로필 수정 실패!");
         }
-        return "layout/result"; // 결과 페이지로 리다이렉트
+        return "users/result"; // 결과 페이지로 리다이렉트
     }
 
     @DeleteMapping("/me")
@@ -89,7 +90,7 @@ public class UserController {
         } else {
             model.addAttribute("message", "회원 탈퇴 실패!");
         }
-        return "layout/result"; // 결과 페이지로 리다이렉트
+        return "users/result"; // 결과 페이지로 리다이렉트
     }
 
     @GetMapping("/{userid}")
@@ -97,10 +98,10 @@ public class UserController {
         User user = userService.getUserById(userid);
         if (user != null) {
             model.addAttribute("user", user);
-            return "/userDetail"; // 사용자 상세 정보 페이지 (userDetail.html) 렌더링
+            return "users/userDetail"; // 사용자 상세 정보 페이지 (userDetail.html) 렌더링
         } else {
             model.addAttribute("message", "사용자를 찾을 수 없습니다.");
-            return "/result";
+            return "users/result";
         }
     }
 

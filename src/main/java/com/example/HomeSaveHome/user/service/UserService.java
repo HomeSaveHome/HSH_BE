@@ -15,6 +15,8 @@ public class UserService {
     // 로그인 인증 처리 메서드
     public boolean authenticateUser(String username, String password) {
         // 아직 DB 연동 안해서 ID : testuser와 비밀번호 password123만 제공
+        System.out.println("Login attempt: username=" + username + ", password=" + password);
+
         return "testuser".equals(username) && "password123".equals(password);
     }
 
