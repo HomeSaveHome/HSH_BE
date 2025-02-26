@@ -24,13 +24,13 @@ public class UserController {
             model.addAttribute("message", "회원가입 실패!");
         }
         // 회원가입 결과 페이지로 리다이렉트
-        return "layout/result";  // /src/main/resources/templates/result.html로 렌더링
+        return "result";  // /src/main/resources/templates/result.html로 렌더링
     }
 
     // GET 방식 : 회원가입 페이지 제공 (나중에 제거해야할 것)
     @GetMapping("/signup")
     public String getSignupForm() {
-        return "layouts/signup";  // /src/main/resources/templates/signup.html로 렌더링
+        return "/signup";  // /src/main/resources/templates/signup.html로 렌더링
     }
 
     // POST 방식 : 로그인 처리
@@ -47,7 +47,7 @@ public class UserController {
     // GET 방식 : 로그인 페이지 제공 (나중에 프론트랑 합칠 때 제거할 예정)
     @GetMapping("/login")
     public String getLoginForm() {
-        return "layouts/login";
+        return "/login";
     }
 
     @PostMapping("/logout")
@@ -66,7 +66,7 @@ public class UserController {
     public String getProfile(Model model) {
         User currentUser = userService.getCurrentUser();
         model.addAttribute("user", currentUser);
-        return "layouts/profile"; // 프로필 페이지 (profile.html) 렌더링
+        return "/profile"; // 프로필 페이지 (profile.html) 렌더링
     }
 
     @PutMapping("/me")
@@ -97,10 +97,10 @@ public class UserController {
         User user = userService.getUserById(userid);
         if (user != null) {
             model.addAttribute("user", user);
-            return "layouts/userDetail"; // 사용자 상세 정보 페이지 (userDetail.html) 렌더링
+            return "/userDetail"; // 사용자 상세 정보 페이지 (userDetail.html) 렌더링
         } else {
             model.addAttribute("message", "사용자를 찾을 수 없습니다.");
-            return "layout/result";
+            return "/result";
         }
     }
 
