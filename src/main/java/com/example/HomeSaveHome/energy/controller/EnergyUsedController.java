@@ -10,8 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +62,17 @@ public class EnergyUsedController {
 
         List<MonthlyEnergyUsedResponse> response = energyUsedService.getEnergyUsedByMonth(userId, energyId, month);
         return ResponseEntity.ok(response);
+    }
+
+    // 저번 달 에너지 사용량 조회
+    @GetMapping("/last-month")
+    public String getLastMonthEnergyUsed(@RequestParam Long userId, Model model) {
+        YearMonth lastMonth = YearMonth.now().minusMonths(1);
+
+        List<MonthlyEnergyUsedResponse> lastUsage = energyUsedService.getEnergyUsedByMonth(userId, null, lastMonth.getMonthValue(), lastMonth.getYear());
+        model.addAttribute("lastUsage", lastUsage);
+
+        return "main";
     }
 
     // 최근 4개월 에너지 사용량 조회
