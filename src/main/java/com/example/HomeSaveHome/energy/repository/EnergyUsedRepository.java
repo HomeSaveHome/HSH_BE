@@ -10,16 +10,16 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface EnergyUsedRepository extends JpaRepository<EnergyUsed, Long> {
-    List<EnergyUsed> findByUserIdAndEnergy_Id(Long userId, Long energyId);
+    List<EnergyUsed> findByUserIdAndEnergyId(Long userId, Long energyId);
 
     @Query("SELECT e.energy.energyName, e.year, SUM(e.amount), SUM(e.price) " +
             "FROM EnergyUsed e " +
-            "WHERE e.userId = :userId AND e.energy.id = :energyId " +
+            "WHERE e.user.id = :userId AND e.energy.id = :energyId " +
             "GROUP BY e.year " +
             "ORDER BY e.year ASC")
     List<Object[]> getYearlyEnergyUsed(@Param("userId") Long userId,
                                        @Param("energyId") Long energyId);
 
 
-    List<EnergyUsed> findByUserIdAndEnergyAndMonthAndYear(User user, Energy energy, int month, int year);
+    List<EnergyUsed> findByUserAndEnergyAndMonthAndYear(User user, Energy energy, int month, int year);
 }
