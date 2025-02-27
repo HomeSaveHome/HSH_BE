@@ -3,6 +3,8 @@ spring:
     active: local
     group:
       local: db
-  sql:
-    init:
-      mode: always
+
+  mustache:
+    prefix: classpath:/templates/
+    suffix: .mustache
+    encoding: UTF-8
