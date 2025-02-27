@@ -7,7 +7,11 @@
 </head>
 <body>
 <h1>회원가입 결과</h1>
-<p>${message}</p>  <!-- 성공/실패 메시지를 출력 -->
+<p th:if="${message}" th:text="${message}" style="color:blue;"></p>
+ <!-- 성공/실패 메시지를 출력 -->
 <a href="/users/signup">회원가입 페이지로 돌아가기</a>
+
+<!-- 로그인 페이지로 돌아가는 버튼 생성-->
+<a href="/users/login">로그인 페이지로 돌아가기</a>
 </body>
 </html>
