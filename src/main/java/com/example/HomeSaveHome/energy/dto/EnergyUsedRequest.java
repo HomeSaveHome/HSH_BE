@@ -1,11 +1,12 @@
 package com.example.HomeSaveHome.energy.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EnergyUsedRequest {
+    private Long userId;
     private Long energyId;
     private int year;
     private int month;
