@@ -5,9 +5,12 @@ import com.example.HomeSaveHome.energy.dto.EnergyUsedResponse;
 import com.example.HomeSaveHome.energy.dto.MonthlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.service.EnergyUsedService;
+import com.example.HomeSaveHome.user.model.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.YearMonth;
 import java.util.List;
@@ -24,15 +27,25 @@ public class EnergyUsedController {
     }
 
     // 에너지 사용량 입력
-    @PostMapping
-    public ResponseEntity<EnergyUsedResponse> addEnergyUsage(
-            @RequestBody EnergyUsedRequest request) {
+    @GetMapping("/input")
+    public String showEnergyInputForm(Model model) {
+        model.addAttribute("energyUsedRequest", new EnergyUsedRequest());
+        return "usage-input";
+    }
 
-        Long userId = 1L;  // 개발용 userId (임시)
-        return ResponseEntity.ok(energyUsedService.addEnergyUsed(
-                userId, request.getEnergyId(), request.getYear(),
-                request.getMonth(), request.getAmount(), request.getPrice()
-        ));
+    @PostMapping("/save")
+    public String addEnergyUsage(@AuthenticationPrincipal User user,  // 로그인한 유저 정보 가져오기
+                                 @ModelAttribute EnergyUsedRequest request,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            request.setUserId(user.getId());
+            energyUsedService.saveEnergyUsage(request);
+            redirectAttributes.addFlashAttribute("successMessage", "에너지 사용량이 성공적으로 등록되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "에너지 사용량 저장 중 오류 발생: " + e.getMessage());
+        }
+
+        return "redirect:/energy";
     }
 
     @GetMapping("/{energyId}")
@@ -57,10 +70,11 @@ public class EnergyUsedController {
     @GetMapping("/monthly")
     public ResponseEntity<List<MonthlyEnergyUsedResponse>> getMonthlyEnergyUsed(
             @RequestParam Long energyId,
-            @RequestParam int month) {
+            @RequestParam int month,
+            @RequestParam int year) {
         Long userId = 1L;  // 개발용 userId
 
-        List<MonthlyEnergyUsedResponse> response = energyUsedService.getEnergyUsedByMonth(userId, energyId, month);
+        List<MonthlyEnergyUsedResponse> response = energyUsedService.getEnergyUsedByMonth(userId, energyId, month, year);
         return ResponseEntity.ok(response);
     }
 
