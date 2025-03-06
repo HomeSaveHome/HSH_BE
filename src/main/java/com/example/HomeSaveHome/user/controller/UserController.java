@@ -39,14 +39,14 @@ public class UserController {
 
     // POST 방식 : 로그인 처리
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password, Model model) {
-        boolean isSuccess = userService.authenticateUser(username, password);
-        System.out.println("로그인 정보: " + username + ", " + password);
+    public String login(@RequestParam String email, @RequestParam String password, Model model) {
+        boolean isSuccess = userService.authenticateUser(email, password);
+        System.out.println("로그인 정보: " + email + ", " + password);
 
         if (isSuccess) {
             // User user = userService.getUserById(username);  // Fetch user details by username
             // return "redirect:/users/info/" + user.getId();  // Redirect to user info page
-            return "redirect:/articles";  // 임시 Redirect to the main page
+            return "mainpage/main2";  // 임시 Redirect to the main page
         } else {
             model.addAttribute("errorMessage", "로그인 실패! 사용자명이나 비밀번호를 확인해주세요.");
             return "users/login";  // Return the login page with an error message

@@ -32,8 +32,8 @@ public class UserService {
     }
 
     // 로그인 인증 처리 메서드
-    public boolean authenticateUser(String username, String password) {
-        User user = userRepository.findByUsername(username);
+    public boolean authenticateUser(String email, String password) {
+        User user = userRepository.findByEmail(email);
         if (user != null && user.getPassword().equals(password)) {
             return true;  // 인증 성공
         }
