@@ -2,6 +2,7 @@ package com.example.HomeSaveHome.user.controller;
 
 import com.example.HomeSaveHome.user.model.User;
 import com.example.HomeSaveHome.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,9 +15,14 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/signup")
+    public String showSignUpForm() {
+        return "users/signup";  // Point this to your login page
+    }
+
     // POST 방식 : 회원가입 처리
     @PostMapping("/signup")
-    public String singUp(@ModelAttribute User user, Model model) {
+    public String signup(@ModelAttribute User user, Model model) {
         boolean isSuccess = userService.registerUser(user);
         if (isSuccess) {
             model.addAttribute("message", "회원가입 성공!");
@@ -26,19 +32,30 @@ public class UserController {
         return "users/result";  // 결과 페이지
     }
 
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "users/login";  // Point this to your login page
+    }
+
     // POST 방식 : 로그인 처리
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password, Model model) {
-        boolean isSuccess = userService.authenticateUser(username, password);
+    public String login(@RequestParam String email, @RequestParam String password, Model model) {
+        boolean isSuccess = userService.authenticateUser(email, password);
+        System.out.println("로그인 정보: " + email + ", " + password);
+
         if (isSuccess) {
-            return "로그인 성공"; // 로그인 성공 메시지
+            // User user = userService.getUserById(username);  // Fetch user details by username
+            // return "redirect:/users/info/" + user.getId();  // Redirect to user info page
+            return "mainpage/main2";  // 임시 Redirect to the main page
         } else {
-            return "로그인 실패! 사용자명이나 비밀번호를 확인해주세요."; // 실패 메시지
+            model.addAttribute("errorMessage", "로그인 실패! 사용자명이나 비밀번호를 확인해주세요.");
+            return "users/login";  // Return the login page with an error message
         }
     }
 
+
     // GET 방식 : ID로 사용자 조회
-    @GetMapping("/{userId}")
+    @GetMapping("info/{userId}")
     public String getUserById(@PathVariable("userId") Long userId, Model model) {
         User user = userService.getUserById(userId);
         if (user != null) {

@@ -3,3 +3,12 @@ spring:
     active: local
     group:
       local: db
+
+  mustache:
+    prefix: classpath:/templates/
+    suffix: .mustache
+    encoding: UTF-8
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
