@@ -101,7 +101,7 @@ public class EnergyUsedService {
         return energyUsedList.stream()
                 .map(e -> new MonthlyEnergyUsedResponse(
                         e.getId(),
-                        e.getEnergy().getEnergyName(),
+                        e.getEnergy().getEnergyType(),
                         e.getYear(),
                         e.getMonth(),
                         e.getAmount(),
@@ -124,7 +124,7 @@ public class EnergyUsedService {
 
             Map<String, MonthlyEnergyUsedResponse> monthData = new HashMap<>();
             for (MonthlyEnergyUsedResponse response : responseList) {
-                monthData.put(response.getEnergyName(), response);
+                monthData.put(response.getEnergyType().name(), response);
             }
 
             last4MonthsEnergy.put(targetMonth.getMonth().toString().substring(0, 3), monthData);
@@ -133,6 +133,67 @@ public class EnergyUsedService {
         return last4MonthsEnergy;
     }
 
+    // 변화율 계산
+    public Map<String, Map<String, Optional<Long>>> getUsageChangeRate(Long userId, List<MonthlyEnergyUsedResponse> currentMonthData) {
+        List<MonthlyEnergyUsedResponse> previousYearData = getEnergyUsedByMonth(userId, null, currentMonthData.get(0).getMonth(), currentMonthData.get(0).getYear() - 1);
+
+        Long gasUsageCurrent = null;
+        Long electricityUsageCurrent = null;
+        Long gasUsagePrevious = null;
+        Long electricityUsagePrevious = null;
+
+        for (MonthlyEnergyUsedResponse data : currentMonthData) {
+            if ("GAS".equalsIgnoreCase(data.getEnergyType().name())) {
+                gasUsageCurrent = data.getPrice();
+            } else if ("ELECTRICITY".equalsIgnoreCase(data.getEnergyType().name())) {
+                electricityUsageCurrent = data.getPrice();
+            }
+        }
+
+        for (MonthlyEnergyUsedResponse data : previousYearData) {
+            if ("GAS".equalsIgnoreCase(data.getEnergyType().name())) {
+                gasUsagePrevious = data.getPrice();
+            } else if ("ELECTRICITY".equalsIgnoreCase(data.getEnergyType().name())) {
+                electricityUsagePrevious = data.getPrice();
+            }
+        }
+
+        // 변화율 계산
+        Optional<Long> gasChangeRate = calculateChangeRate(gasUsageCurrent, gasUsagePrevious);
+        Optional<Long> electricityChangeRate = calculateChangeRate(electricityUsageCurrent, electricityUsagePrevious);
+        // 가격 차이 계산
+        Optional<Long> gasPriceDiff = calculatePriceDiff(gasUsageCurrent, gasUsagePrevious);
+        Optional<Long> electricityPriceDiff = calculatePriceDiff(electricityUsageCurrent, electricityUsagePrevious);
+
+        Map<String, Map<String, Optional<Long>>> result = new HashMap<>();
+
+        Map<String, Optional<Long>> gasData = new HashMap<>();
+        gasData.put("changeRate", gasChangeRate);
+        gasData.put("priceDiff", gasPriceDiff);
+
+        Map<String, Optional<Long>> electricityData = new HashMap<>();
+        gasData.put("changeRate", electricityChangeRate);
+        gasData.put("priceDiff", electricityPriceDiff);
+
+        result.put("gas", gasData);
+        result.put("electricity", electricityData);
+
+        return result;
+    }
+
+    private Optional<Long> calculateChangeRate(Long current, Long previous) {
+        if (current == null) return Optional.empty();
+        if (previous == null || previous == 0) return Optional.empty();
+
+        return Optional.of(((current - previous) / previous) * 100);
+    }
+
+    private Optional<Long> calculatePriceDiff(Long current, Long previous) {
+        if (current == null || previous == null) {
+            return Optional.empty();
+        }
+        return Optional.of(current - previous);
+    }
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
