@@ -1,6 +1,7 @@
 package com.example.HomeSaveHome.energy.service;
 
 import com.example.HomeSaveHome.energy.entity.Energy;
+import com.example.HomeSaveHome.energy.entity.EnergyType;
 import com.example.HomeSaveHome.energy.repository.EnergyRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +21,8 @@ public class EnergyService {
         return energyRepository.findAll();
     }
 
-    public Optional<Energy> getEnergyByName(String energyName) {
-        return energyRepository.findByEnergyName(energyName);
+    public Optional<Energy> getEnergyByName(EnergyType energyType) {
+        return energyRepository.findByEnergyType(energyType);
     }
 
     public Energy saveEnergy(Energy energy) {
