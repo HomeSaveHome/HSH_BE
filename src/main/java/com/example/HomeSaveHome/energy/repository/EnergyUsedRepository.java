@@ -12,7 +12,7 @@ import java.util.List;
 public interface EnergyUsedRepository extends JpaRepository<EnergyUsed, Long> {
     List<EnergyUsed> findByUserIdAndEnergyId(Long userId, Long energyId);
 
-    @Query("SELECT e.energy.energyName, e.year, SUM(e.amount), SUM(e.price) " +
+    @Query("SELECT e.energy.energyType, e.year, SUM(e.amount), SUM(e.price) " +
             "FROM EnergyUsed e " +
             "WHERE e.user.id = :userId AND e.energy.id = :energyId " +
             "GROUP BY e.year " +
