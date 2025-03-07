@@ -12,9 +12,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/energyUsed")
@@ -67,17 +69,6 @@ public class EnergyUsedController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/monthly")
-    public ResponseEntity<List<MonthlyEnergyUsedResponse>> getMonthlyEnergyUsed(
-            @RequestParam Long energyId,
-            @RequestParam int month,
-            @RequestParam int year) {
-        Long userId = 1L;  // 개발용 userId
-
-        List<MonthlyEnergyUsedResponse> response = energyUsedService.getEnergyUsedByMonth(userId, energyId, month, year);
-        return ResponseEntity.ok(response);
-    }
-
     // 저번 달 에너지 사용량 조회
     @GetMapping("/last-month")
     public String getLastMonthEnergyUsed(@RequestParam Long userId, Model model) {
@@ -107,5 +98,31 @@ public class EnergyUsedController {
         model.addAttribute("maxElectricPrice", maxElectricPrice);
 
         return "main";
+    }
+
+    // 월 별 조회
+    @GetMapping("/monthly")
+    public String getMonthlyEnergyUsed(
+            @RequestParam Long userId,
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month,
+            Model model) {
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
+
+        if (year == null) year = currentYear;
+        if (month == null) month = currentMonth;
+
+        // 검색한 월 에너지 사용량 데이터 가져오기
+        List<MonthlyEnergyUsedResponse> currentMonthData = energyUsedService.getEnergyUsedByMonth(userId, null, month, year);
+
+        // 변화율 데이터 가져오기
+        Map<String, Map<String, Optional<Long>>> changeRates = energyUsedService.getUsageChangeRate(userId, currentMonthData);
+
+        model.addAttribute("currentMonthData", currentMonthData);
+        model.addAttribute("changeRates", changeRates);
+
+        return "monthly-usage";
     }
 }

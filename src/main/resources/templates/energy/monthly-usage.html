@@ -1,0 +1,87 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>특정 월 에너지 사용량 조회</title>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="monthly-usage-container">
+    <h2>월 별 에너지 사용량</h2>
+
+    <!-- 연도 & 월 선택 드롭다운 -->
+    <div class="dropdown-container">
+        <form method="get" action="/energyUsed/monthly">
+            <input type="hidden" name="userId", th:value="${userId}" />
+            <select name="year">
+                <option th:each="y : ${#numbers.sequence(2010, 2025)}"
+                        th:value="${y}" th:text="${y} + '년'" th:selected="y == selectedYear"></option>
+            </select>
+            <select name="month">
+                <option th:each="y : ${#numbers.sequence(1, 12)}"
+                        th:value="${m}" th:text="${m} + '월'" th:selected="m == month"></option>
+            </select>
+        </form>
+        <button type="submit">조회</button>
+    </div>
+
+    <!-- 에너지 사용량 바 -->
+    <div class="usage-bar-container">
+        <div class="bar" th:each="data : ${currentMonthData}">
+            <div class="bar-label" th:text="${data.energyType}"></div>
+            <div class="bar-value" th:text="${data.amount}"></div>
+        </div>
+    </div>
+
+    <!-- 가격 비교 -->
+    <div class="price-diff-container">
+        <div class="diff-card" th:each="data : ${currentMonthData}">
+            <h3 th:switch="${data.energyType}">
+                <span th:case="'GAS'">가스</span>
+                <span th:case="'ELECTRICITY'">가스</span>
+            </h3>
+            <p th:text="'₩ ' + ${data.price}"></p>
+            <p th:if="${changeRates[data.energyType] != null}">
+                <img th:src="@{/images/up-arrow.svg}" alt="">
+                <span th:with="rate=${changeRates[data.energyType].changeRate.orElse(0)}">
+                    <img th:src="@{/images/{arrow}.svg(arrow=${rate < 0 ? 'up-arrow' : 'down-arrow'})}" alt="">
+                    <span th:text="'전년도 대비 ' + ${rate < 0 ? ('+' + (-rate)) : ('-' + rate)} + '%'"></span>
+                </span>
+            </p>
+            <!-- 전년도 데이터가 없는 경우 -->
+            <p th:if="${changeRates[data.energyType] == null}" class="no-data">
+                <img th:src="@{/images/no.svg}" alt="데이터 없음">
+                전년도 사용량 없음
+            </p>
+        </div>
+
+        <!-- 목표 달성률(아직 하드코딩) -->
+        <div class="goal-container">
+            <h3>목표 달성률</h3>
+            <div class="goal-result-card" th:each="data : ${currentMonthData}">
+                <h3 th:switch="${data.energyType}">
+                    <span th:case="'GAS'">가스</span>
+                    <span th:case="'ELECTRICITY'">가스</span>
+                </h3>
+                <div class="goal-progress"
+                     th:classappend="${data.goalPercent > 100} ? 'over' : 'normal'">
+                    <span th:text="${data.goalPercent} + '%'"></span>
+                </div>
+                <div class="goal-price">
+                    <p th:text="'₩' + ${data.goal}"></p>
+                    <p>Goal</p>
+                </div>
+                <div class="usage-price">
+                    <p th:text="'₩' + ${data.price}"></p>
+                    <p>Usage</p>
+                </div>
+                <p th:if="${data.goalPercent == 100}" class="success">🎉 목표 달성 성공! 🎉</p>
+                <p th:if="${data.goalPercent != 100}" class="fail">😵 목표 달성 실패! 😵</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
