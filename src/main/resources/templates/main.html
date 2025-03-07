@@ -1,0 +1,48 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>메인 페이지</title>
+</head>
+<body>
+<div class="main-container">
+    <div th:replace="~{header :: header}"></div>
+    <section class="energy-last-month" th:each="data : ${lastMonthData}">
+        <h2>저번 달 에너지 사용량</h2>
+        <tbody class="energy-box">
+            <tr th:each="lastMonthData : ${lastMonthData}">
+                <td>
+                    <img th:src="@{'/images/' + ${lastMonthData.energyName} + '.svg'}"
+                         th:alt="${lastMonthData.energyName}"
+                    />
+                </td>
+                <td>
+                    <span th:if="${lastMonthData == 'gas'}" th:text="가스 사용량"></span>
+                    <span th:if="${lastMonthData == 'electric'}" th:text="전기 사용량"></span>
+                </td>
+                <td th:text="'₩ ' + ${lastMonthData.price}"></td>
+            </tr>
+        </tbody>
+    </section>
+    <section class="energy-analytics">
+        <h2>Usage Analytics</h2>
+        <div class="chart">
+            <div class="bar" th:each="analytic : ${usageAnalytics}">
+                <span th:text="${analytic.key}"></span>
+                <div class="bar-gas"
+                     th:style="'width: ' + ${analytic.value['gas']?.price} * 100 / ${maxGasPrice} + '%'"
+                     th:text="'₩ ' + ${analytic.value['gas']?.price}">
+                </div>
+                <div class="bar-electric"
+                     th:style="'width: ' + ${analytic.value['electric']?.price} * 100 / ${maxElectricPrice} + '%'"
+                     th:text="'₩ ' + ${analytic.value['electric']?.price}">
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
