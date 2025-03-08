@@ -56,30 +56,30 @@
                 전년도 사용량 없음
             </p>
         </div>
+    </div>
 
-        <!-- 목표 달성률(아직 하드코딩) -->
-        <div class="goal-container">
-            <h3>목표 달성률</h3>
-            <div class="goal-result-card" th:each="data : ${currentMonthData}">
-                <h3 th:switch="${data.energyType}">
-                    <span th:case="'GAS'">가스</span>
-                    <span th:case="'ELECTRICITY'">가스</span>
-                </h3>
-                <div class="goal-progress"
-                     th:classappend="${data.goalPercent > 100} ? 'over' : 'normal'">
-                    <span th:text="${data.goalPercent} + '%'"></span>
-                </div>
-                <div class="goal-price">
-                    <p th:text="'₩' + ${data.goal}"></p>
-                    <p>Goal</p>
-                </div>
-                <div class="usage-price">
-                    <p th:text="'₩' + ${data.price}"></p>
-                    <p>Usage</p>
-                </div>
-                <p th:if="${data.goalPercent == 100}" class="success">🎉 목표 달성 성공! 🎉</p>
-                <p th:if="${data.goalPercent != 100}" class="fail">😵 목표 달성 실패! 😵</p>
+    <!-- 목표 달성률(아직 하드코딩) -->
+    <div class="goal-container">
+        <h3>목표 달성률</h3>
+        <div class="goal-result-card" th:each="data : ${currentMonthData}">
+            <h3 th:switch="${data.energyType}">
+                <span th:case="'GAS'">가스</span>
+                <span th:case="'ELECTRICITY'">가스</span>
+            </h3>
+            <div class="goal-progress"
+                 th:classappend="${data.goalPercent > 100} ? 'over' : 'normal'">
+                <span th:text="${data.goalPercent} + '%'"></span>
             </div>
+            <div class="goal-price">
+                <p th:text="'₩' + ${data.goal}"></p>
+                <p>Goal</p>
+            </div>
+            <div class="usage-price">
+                <p th:text="'₩' + ${data.price}"></p>
+                <p>Usage</p>
+            </div>
+            <p th:if="${data.goalPercent == 100}" class="success">🎉 목표 달성 성공! 🎉</p>
+            <p th:if="${data.goalPercent != 100}" class="fail">😵 목표 달성 실패! 😵</p>
         </div>
     </div>
 </div>

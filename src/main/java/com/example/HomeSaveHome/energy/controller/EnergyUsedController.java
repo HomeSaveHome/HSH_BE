@@ -110,7 +110,7 @@ public class EnergyUsedController {
         List<MonthlyEnergyUsedResponse> currentMonthData = energyUsedService.getEnergyUsedByMonth(userId, null, month, year);
 
         // 변화율 데이터 가져오기
-        Map<String, Map<String, Optional<Long>>> changeRates = energyUsedService.getUsageChangeRate(userId, currentMonthData);
+        Map<EnergyType, Optional<Long>> changeRates = energyUsedService.getUsageChangeRate(userId, currentMonthData);
 
         model.addAttribute("currentMonthData", currentMonthData);
         model.addAttribute("changeRates", changeRates);
