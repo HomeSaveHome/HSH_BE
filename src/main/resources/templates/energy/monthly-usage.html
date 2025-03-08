@@ -41,11 +41,10 @@
         <div class="diff-card" th:each="data : ${currentMonthData}">
             <h3 th:switch="${data.energyType}">
                 <span th:case="'GAS'">가스</span>
-                <span th:case="'ELECTRICITY'">가스</span>
+                <span th:case="'ELECTRICITY'">전기</span>
             </h3>
             <p th:text="'₩ ' + ${data.price}"></p>
             <p th:if="${changeRates[data.energyType] != null}">
-                <img th:src="@{/images/up-arrow.svg}" alt="">
                 <span th:with="rate=${changeRates[data.energyType].changeRate.orElse(0)}">
                     <img th:src="@{/images/{arrow}.svg(arrow=${rate < 0 ? 'up-arrow' : 'down-arrow'})}" alt="">
                     <span th:text="'전년도 대비 ' + ${rate < 0 ? ('+' + (-rate)) : ('-' + rate)} + '%'"></span>
