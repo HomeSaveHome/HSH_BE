@@ -110,7 +110,7 @@ public class EnergyUsedController {
         List<MonthlyEnergyUsedResponse> currentMonthData = energyUsedService.getEnergyUsedByMonth(userId, null, month, year);
 
         // 변화율 데이터 가져오기
-        Map<EnergyType, Optional<Long>> changeRates = energyUsedService.getUsageChangeRate(userId, currentMonthData);
+        Map<EnergyType, Optional<Double>> changeRates = energyUsedService.getUsageChangeRate(userId, currentMonthData);
 
         model.addAttribute("currentMonthData", currentMonthData);
         model.addAttribute("changeRates", changeRates);
@@ -132,12 +132,12 @@ public class EnergyUsedController {
         // 검색한 년도 에너지 데이터 가져오기
         List<YearlyEnergyUsedResponse> currentYearData = energyUsedService.getYearlyEnergyUsed(userId, null, year);
         // 총 사용량 변화율 데이터 가져오기
-        Map<EnergyType, Optional<Long>> yearlyChangeRates = energyUsedService.getYearlyUsedChangeRate(userId, year, currentYearData);
+        Map<EnergyType, Optional<Double>> yearlyChangeRates = energyUsedService.getYearlyUsedChangeRate(userId, year, currentYearData);
 
         // 월 평균 데이터 가져오기
         Map<EnergyType, Long> avgUsedMap = energyUsedService.getEvgUsed(userId, null, year);
         // 변화율 데이터 가져오기
-        Map<EnergyType, Optional<Long>> avgChangeRates = energyUsedService.getYearlyAvgUsedChangeRate(userId, year, avgUsedMap);
+        Map<EnergyType, Optional<Double>> avgChangeRates = energyUsedService.getYearlyAvgUsedChangeRate(userId, year, avgUsedMap);
 
         model.addAttribute("currentYearData", currentYearData);
         model.addAttribute("yearlyChangeRates", yearlyChangeRates);
