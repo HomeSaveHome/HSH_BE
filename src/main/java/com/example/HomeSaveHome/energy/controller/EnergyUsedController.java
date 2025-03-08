@@ -4,6 +4,7 @@ import com.example.HomeSaveHome.energy.dto.EnergyUsedRequest;
 import com.example.HomeSaveHome.energy.dto.EnergyUsedResponse;
 import com.example.HomeSaveHome.energy.dto.MonthlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
+import com.example.HomeSaveHome.energy.entity.EnergyType;
 import com.example.HomeSaveHome.energy.service.EnergyUsedService;
 import com.example.HomeSaveHome.user.model.User;
 import org.springframework.http.ResponseEntity;
@@ -58,15 +59,6 @@ public class EnergyUsedController {
         List<EnergyUsedResponse> energyUsedResponses = energyUsedService.getEnergyUsedByUserAndEnergyId(userId, energyId);
 
         return ResponseEntity.ok(energyUsedResponses);
-    }
-
-    @GetMapping("/yearly")
-    public ResponseEntity<List<YearlyEnergyUsedResponse>> getYearlyEnergyUsed(
-            @RequestParam Long energyId) {
-        Long userId = 1L;  // 개발용 userId (임시)
-
-        List<YearlyEnergyUsedResponse> response = energyUsedService.getYearlyEnergyUsed(userId, energyId);
-        return ResponseEntity.ok(response);
     }
 
     // 저번 달 에너지 사용량 조회
@@ -124,5 +116,33 @@ public class EnergyUsedController {
         model.addAttribute("changeRates", changeRates);
 
         return "monthly-usage";
+    }
+
+    // 연도 별 에너지 사용량 조회
+    @GetMapping("/yearly")
+    public String getYearlyEnergyUsed(
+            @RequestParam Long userId,
+            @RequestParam(value = "year", required = false) Integer year,
+            Model model) {
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+
+        if (year == null) year = currentYear;
+
+        // 검색한 년도 에너지 데이터 가져오기
+        List<YearlyEnergyUsedResponse> currentYearData = energyUsedService.getYearlyEnergyUsed(userId, null, year);
+        // 총 사용량 변화율 데이터 가져오기
+        Map<EnergyType, Optional<Long>> yearlyChangeRates = energyUsedService.getYearlyUsedChangeRate(userId, year, currentYearData);
+
+        // 월 평균 데이터 가져오기
+        Map<EnergyType, Long> avgUsedMap = energyUsedService.getEvgUsed(userId, null, year);
+        // 변화율 데이터 가져오기
+        Map<EnergyType, Optional<Long>> avgChangeRates = energyUsedService.getYearlyAvgUsedChangeRate(userId, year, avgUsedMap);
+
+        model.addAttribute("currentYearData", currentYearData);
+        model.addAttribute("yearlyChangeRates", yearlyChangeRates);
+        model.addAttribute("avgChangeRates", avgChangeRates);
+
+        return "yearly-usage";
     }
 }
