@@ -151,7 +151,7 @@ public class EnergyUsedService {
     }
 
     // 변화율 계산
-    public Map<String, Map<String, Optional<Long>>> getUsageChangeRate(Long userId, List<MonthlyEnergyUsedResponse> currentMonthData) {
+    public Map<EnergyType, Optional<Long>> getUsageChangeRate(Long userId, List<MonthlyEnergyUsedResponse> currentMonthData) {
         List<MonthlyEnergyUsedResponse> previousYearData = getEnergyUsedByMonth(userId, null, currentMonthData.get(0).getMonth(), currentMonthData.get(0).getYear() - 1);
 
         Long gasUsageCurrent = null;
@@ -178,22 +178,10 @@ public class EnergyUsedService {
         // 변화율 계산
         Optional<Long> gasChangeRate = calculateChangeRate(gasUsageCurrent, gasUsagePrevious);
         Optional<Long> electricityChangeRate = calculateChangeRate(electricityUsageCurrent, electricityUsagePrevious);
-        // 가격 차이 계산
-        Optional<Long> gasPriceDiff = calculatePriceDiff(gasUsageCurrent, gasUsagePrevious);
-        Optional<Long> electricityPriceDiff = calculatePriceDiff(electricityUsageCurrent, electricityUsagePrevious);
 
-        Map<String, Map<String, Optional<Long>>> result = new HashMap<>();
-
-        Map<String, Optional<Long>> gasData = new HashMap<>();
-        gasData.put("changeRate", gasChangeRate);
-        gasData.put("priceDiff", gasPriceDiff);
-
-        Map<String, Optional<Long>> electricityData = new HashMap<>();
-        gasData.put("changeRate", electricityChangeRate);
-        gasData.put("priceDiff", electricityPriceDiff);
-
-        result.put("gas", gasData);
-        result.put("electricity", electricityData);
+        Map<EnergyType, Optional<Long>> result = new HashMap<>();
+        result.put(EnergyType.GAS, gasChangeRate);
+        result.put(EnergyType.ELECTRICITY, electricityChangeRate);
 
         return result;
     }
