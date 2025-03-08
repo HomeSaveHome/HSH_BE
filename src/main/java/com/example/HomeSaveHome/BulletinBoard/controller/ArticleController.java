@@ -54,7 +54,10 @@ public class ArticleController {
     }
     @GetMapping("/articles")
     public String index(Model model) {
-        List<Article> articleEntityList = articleRepository.findAll(); // 1. Bring all articles from DB
+        // TODO: findByBoardId() should have variable as parameter, not 1L
+        List<Article> articleEntityList = articleRepository.findByBoardId(1L); // 1. Bring all articles from DB
+
+
         model.addAttribute("articleList", articleEntityList);// 2. Save them in the model
         return "articles/index"; // 3. Return the view page
 

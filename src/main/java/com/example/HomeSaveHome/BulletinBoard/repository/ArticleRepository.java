@@ -6,6 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.ArrayList;
 
 public interface ArticleRepository extends CrudRepository<Article, Long> {
-    @Override
-    ArrayList<Article> findAll(); // Iterable --> ArrayList type casting.
+    ArrayList<Article> findByBoardId(Long boardId); // Iterable --> ArrayList type casting.
 }
