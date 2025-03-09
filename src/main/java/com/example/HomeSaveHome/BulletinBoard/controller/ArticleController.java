@@ -3,15 +3,19 @@ package com.example.HomeSaveHome.BulletinBoard.controller;
 import com.example.HomeSaveHome.BulletinBoard.dto.ArticleForm;
 import com.example.HomeSaveHome.BulletinBoard.dto.CommentDto;
 import com.example.HomeSaveHome.BulletinBoard.entity.Article;
+import com.example.HomeSaveHome.BulletinBoard.entity.Board;
 import com.example.HomeSaveHome.BulletinBoard.repository.ArticleRepository;
+import com.example.HomeSaveHome.BulletinBoard.repository.BoardRepository;
 import com.example.HomeSaveHome.BulletinBoard.service.CommentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -20,67 +24,103 @@ import java.util.List;
 
 @Controller
 public class ArticleController {
+
+    private final ArticleRepository articleRepository;
+    private final BoardRepository boardRepository;
+
     @Autowired
-    private ArticleRepository articleRepository;
+    public ArticleController(ArticleRepository articleRepository, BoardRepository boardRepository) {
+        this.articleRepository = articleRepository;
+        this.boardRepository = boardRepository;
+    }
+
     @Autowired
     private CommentService commentService;
-@GetMapping("/articles/new")
-    public String newArticleForm() {
+    @GetMapping(("/boards/{boardId}/articles/new"))
+    public String newArticleForm(@PathVariable Long boardId, Model model) {
+        model.addAttribute("boardId", boardId);
         return "articles/new";
     }
-@PostMapping("/articles/create")
-    public String createArticle(ArticleForm form) {
+    @PostMapping("/boards/{boardId}/articles/create")
+    public String createArticle(ArticleForm form, @PathVariable Long boardId, Model model) {
         log.info(form.toString());
-        // System.out.println(form.toString());
+
+        // Ensure the board exists
+        Board board = boardRepository.findById(boardId).orElse(null);
+        if (board == null) {
+            return "redirect:/boards"; // Redirect if board doesn't exist
+        }
+
+        // Create the article and assign the board
         Article article = form.toEntity();
-        log.info(article.toString());
-        // System.out.println(article.toString());
+        article.setBoard(board); // ✅ Ensure board is assigned!
+
+        log.info("Saving article: " + article);
         Article saved = articleRepository.save(article);
-        log.info(saved.toString());
-        // System.out.println(saved.toString());
-        return "redirect:/articles/" + saved.getId(); // Redirect
+        log.info("Saved article: " + saved);
+
+        model.addAttribute("boardId", boardId);
+        return "redirect:/boards/{boardId}/articles/" + saved.getId(); // Redirect to article view
     }
-    @GetMapping("/articles/{id}")
-    public String show(@PathVariable Long id, Model model) {
+
+
+    @GetMapping(("/boards/{boardId}/articles/{id}"))
+    public String show(@PathVariable Long id, @PathVariable Long boardId, Model model) {
         log.info("id = " + id);
         Article articleEntity = articleRepository.findById(id).orElse(null); // check the id and bring the data
 
         List<CommentDto> commentDtos = commentService.comments(id);
 
         model.addAttribute("article", articleEntity); // register the data in the model
+        model.addAttribute("boardId", boardId);
         model.addAttribute("commentDtos", commentDtos);
         return "articles/show"; // return the view page
 
     }
-    @GetMapping("/articles")
-    public String index(Model model) {
-        // TODO: findByBoardId() should have variable as parameter, not 1L
-        List<Article> articleEntityList = articleRepository.findByBoardId(1L); // 1. Bring all articles from DB
+    @GetMapping("/boards/{boardId}/articles")
+    public String index(@PathVariable Long boardId, Model model) {
+        Board board = boardRepository.findById(boardId).orElse(null);
+        if (board == null) {
+            return "redirect:/boards"; // Redirect if board doesn't exist
+        }
 
+        List<Article> articles = articleRepository.findByBoardId(boardId);
+        log.info("Fetched " + articles.size() + " articles for board " + boardId); // ✅ Debugging log
 
-        model.addAttribute("articleList", articleEntityList);// 2. Save them in the model
-        return "articles/index"; // 3. Return the view page
+        model.addAttribute("articleList", articles);
+        model.addAttribute("boardId", boardId);
 
+        return "articles/index";
     }
-@GetMapping("/articles/{id}/edit")
-    public String edit(@PathVariable Long id, Model model) {
+
+
+    @GetMapping(("/boards/{boardId}/articles/{id}/edit"))
+    public String edit(@PathVariable Long id, @PathVariable Long boardId, Model model) {
         Article articleEntity = articleRepository.findById(id).orElse(null); // check the id and bring the data
         model.addAttribute("article", articleEntity); // register the data in the model
+        model.addAttribute("boardId", boardId);
         return "articles/edit"; // set the view page
     }
-    @PostMapping("/articles/update")
-    public String update(ArticleForm form) {
-
+    @PostMapping("/boards/{boardId}/articles/update")
+    public String update(ArticleForm form, @PathVariable Long boardId) {
         Article articleEntity = form.toEntity();
-        log.info(articleEntity.toString());
-        Article target = articleRepository.findById(articleEntity.getId()).orElse(null);
-        if (target != null) {
+
+        // Retrieve the existing article from the database
+        Article existingArticle = articleRepository.findById(articleEntity.getId()).orElse(null);
+
+        if (existingArticle != null) {
+            // ✅ Preserve the existing board reference
+            articleEntity.setBoard(existingArticle.getBoard());
+
+            log.info("Updating article: " + articleEntity);
             articleRepository.save(articleEntity);
         }
-        return "redirect:/articles/" + articleEntity.getId();
+
+        return "redirect:/boards/" + boardId + "/articles/" + articleEntity.getId();
     }
 
-    @GetMapping("articles/{id}/delete")
+
+    @GetMapping("/boards/{boardId}/articles/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes rttr) {
         Article target = articleRepository.findById(id).orElse(null); // 1. Identify which article is to be deleted
 
@@ -89,7 +129,7 @@ public class ArticleController {
             rttr.addFlashAttribute("msg", "Article Deleted.");
         }
 
-        return "redirect:/articles"; // 3. Redirect to the result page
+        return "redirect:/boards/{boardId}/articles"; // 3. Redirect to the result page
 
     }
 }

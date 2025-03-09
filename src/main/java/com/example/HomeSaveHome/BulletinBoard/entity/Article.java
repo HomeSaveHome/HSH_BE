@@ -38,4 +38,8 @@ public class Article {
             this.content = article.content;
         }
     }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
 }

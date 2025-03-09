@@ -1,10 +1,10 @@
 package com.example.HomeSaveHome.BulletinBoard.repository;
 
 import com.example.HomeSaveHome.BulletinBoard.entity.Article;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public interface ArticleRepository extends CrudRepository<Article, Long> {
-    ArrayList<Article> findByBoardId(Long boardId); // Iterable --> ArrayList type casting.
+public interface ArticleRepository extends JpaRepository<Article, Long> {
+    List<Article> findByBoardId(Long boardId);
 }
