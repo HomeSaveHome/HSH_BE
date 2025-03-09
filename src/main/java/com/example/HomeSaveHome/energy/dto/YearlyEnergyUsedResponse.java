@@ -1,13 +1,16 @@
 package com.example.HomeSaveHome.energy.dto;
 
+import com.example.HomeSaveHome.energy.entity.EnergyType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class YearlyEnergyUsedResponse {
-    private String energyName;
+    private EnergyType energyType;
     private int year;
-    private double totalAmount;
+    private Double totalAmount;
     private Long totalPrice;
 }
