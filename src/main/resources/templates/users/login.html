@@ -16,9 +16,8 @@
         <button class="kakao-btn">카카오톡으로 1초만에 시작하기</button>
         <p class="or-text">또는</p>
 
-        <!-- 실제 form으로 변경해서 Spring Security가 처리하도록 수정 -->
         <form action="/users/login" method="post">
-            <input type="email" name="username" id="email" placeholder="이메일" required>
+            <input type="email" name="email" id="email" placeholder="이메일" required>
             <input type="password" name="password" id="password" placeholder="비밀번호" required>
             <button type="submit" class="login-btn">로그인</button>
         </form>

@@ -1,5 +1,6 @@
 package com.example.HomeSaveHome.energy.entity;
 
+import com.example.HomeSaveHome.user.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,8 +21,9 @@ public class EnergyUsed {
     @JoinColumn(name = "energy_id", nullable = false)
     private Energy energy;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private int year;

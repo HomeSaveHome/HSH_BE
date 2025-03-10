@@ -20,6 +20,14 @@ public class Article {
     private String title;
 @Column
     private String content;
+@Column
+    private String author;
+@Column
+    private String date;
+
+    @ManyToOne
+    @JoinColumn(name = "board_id")
+    private Board board;
 
 
     public void patch(Article article) {

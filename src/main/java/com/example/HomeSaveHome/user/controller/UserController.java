@@ -2,7 +2,6 @@ package com.example.HomeSaveHome.user.controller;
 
 import com.example.HomeSaveHome.user.model.User;
 import com.example.HomeSaveHome.user.service.UserService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,9 +14,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // 회원가입 페이지 요청
     @GetMapping("/signup")
     public String showSignUpForm() {
-        return "users/signup";  // Point this to your login page
+        return "users/signup";  // 회원가입 폼 페이지로 이동
     }
 
     // POST 방식 : 회원가입 처리
@@ -29,27 +29,35 @@ public class UserController {
         } else {
             model.addAttribute("message", "회원가입 실패! 이미 존재하는 사용자 이름 또는 이메일입니다.");
         }
-        return "users/result";  // 결과 페이지
+        return "users/result";  // 결과 페이지로 이동
     }
 
+    // 로그인 페이지 요청
     @GetMapping("/login")
     public String showLoginForm() {
-        return "users/login";  // Point this to your login page
+        return "users/login";  // 로그인 폼 페이지로 이동
     }
 
     // POST 방식 : 로그인 처리
     @PostMapping("/login")
     public String login(@RequestParam String email, @RequestParam String password, Model model) {
-        boolean isSuccess = userService.authenticateAndSetContext(email, password);
-        if (isSuccess) {
-            return "redirect:/mainpage/main2";  // 로그인 성공 시 메인으로
+        // 첫 번째로 authenticateUser로 인증만 먼저 수행
+        boolean isAuthenticated = userService.authenticateUser(email, password);
+
+        if (isAuthenticated) {
+            // 두 번째로 authenticateAndSetContext로 SecurityContext에 설정
+            if (userService.authenticateAndSetContext(email, password)) {
+                System.out.println("로그인 성공");
+                return "redirect:/main";  // 로그인 성공 시
+            }
         } else {
-            model.addAttribute("errorMessage", "로그인 실패! 이메일이나 비밀번호를 확인해주세요.");
-            return "users/login";
+            model.addAttribute("error", "Invalid email or password");
+            return "login";  // 로그인 실패 시
         }
+
+        model.addAttribute("error", "Authentication failed");
+        return "login";  // 인증 실패 시
     }
-
-
 
     // GET 방식 : ID로 사용자 조회
     @GetMapping("info/{userId}")
@@ -88,6 +96,4 @@ public class UserController {
         }
         return "users/result"; // 결과 페이지
     }
-
-    // 기타 메서드들 (프로필 수정, 삭제 등)
 }
