@@ -9,11 +9,23 @@
 </head>
 <body>
     <div class="header" th:fragment="header">
-        <div class="logo">HomeSaveHome</div>
+        <a class="logo" href="/main">HomeSaveHome</a>
         <div class="navbar">
-            <a href="/">MAIN</a>
-            <a href="/">USAGE</a>
-            <a href="/">GOAL</a>
+            <div class="nav-item">
+                <a href="#">USAGE</a>
+                <div class="dropdown-content">
+                    <a href="/energyUsed/input">사용량 입력</a>
+                    <a href="/energyUsed/monthly">월별 조회</a>
+                    <a href="/energyUsed/yearly">연도별 조회</a>
+                </div>
+            </div>
+            <div class="nav-item">
+                <a href="#">GOAL</a>
+                <div class="dropdown-content">
+                    <a href="#">월간 목표 입력</a>
+                    <a href="#">연간 목표 입력</a>
+                </div>
+            </div>
             <a href="/articles">COMMUNITY</a>
             <a href="/"><img th:src="@{/images/user.png}" alt="user"></a>
         </div>
