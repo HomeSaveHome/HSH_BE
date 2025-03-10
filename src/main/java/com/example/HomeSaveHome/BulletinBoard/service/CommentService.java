@@ -5,7 +5,10 @@ import com.example.HomeSaveHome.BulletinBoard.entity.Article;
 import com.example.HomeSaveHome.BulletinBoard.entity.Comment;
 import com.example.HomeSaveHome.BulletinBoard.repository.ArticleRepository;
 import com.example.HomeSaveHome.BulletinBoard.repository.CommentRepository;
+import com.example.HomeSaveHome.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,8 @@ public class CommentService {
     private CommentRepository commentRepository;
     @Autowired
     private ArticleRepository articleRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public List<CommentDto> comments(Long articleId) {
 //        // 1. Show all comments
@@ -34,17 +39,39 @@ public class CommentService {
                 .stream()
                 .map(comment -> CommentDto.createCommentDto(comment)).collect(Collectors.toList());
     }
-@Transactional
-    public CommentDto create(Long articleId, CommentDto dto) {
-        // 1. DTO --> Entity transformation and exception handling
-        Article article = articleRepository.findById(articleId).orElseThrow(()-> new IllegalArgumentException(("Can't create comment!" + "Article does not exist")));
-        // 2. Create comment entity
-        Comment comment = Comment.createComment(dto, article);
-        // 3. Save the comment entity into DB
+    @Transactional
+    public CommentDto create(Long articleId, CommentDto dto, String username) {
+        // Debugging logs
+        System.out.println("Creating comment for article ID: " + articleId);
+        System.out.println("Received DTO: " + dto);
+
+        // 1. Find the article and handle the exception
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new IllegalArgumentException("Can't create comment! Article does not exist"));
+
+
+        // Debugging log: Check retrieved username
+        System.out.println("Retrieved username: " + username);
+
+        // 3. Create the comment entity with author
+        Comment comment = Comment.createComment(dto, article, username);
+
+        // Debugging log: Check if board is correctly assigned
+        System.out.println("Comment Board ID: " + (comment.getBoard() != null ? comment.getBoard().getId() : "NULL"));
+
+        // 4. Save to DB
         Comment created = commentRepository.save(comment);
-        // 4. Return the entity as DTO (by converting it)
+
+        // 5. Convert to DTO and return
         return CommentDto.createCommentDto(created);
     }
+
+
+    private String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
+    }
+
     @Transactional
     public CommentDto update(Long id, CommentDto dto) {
         // 1. Find the comment entity and handle the exception

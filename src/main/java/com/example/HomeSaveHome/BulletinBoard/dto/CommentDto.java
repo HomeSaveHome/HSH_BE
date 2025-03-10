@@ -14,15 +14,16 @@ import lombok.ToString;
 public class CommentDto {
     private Long id;
     private Long articleId;
-    private String nickname;
     private String body;
+    private String author;
 
     public static CommentDto createCommentDto(Comment comment) {
         return new CommentDto(
-                comment.getId(), // Comment entity's ID
-                comment.getArticle().getId(), // Parent Article entity's ID
-                comment.getNickname(), // Comment entity's nickname
-                comment.getBody() // Comment entity's body
+                comment.getId(),
+                comment.getArticle().getId(),
+                comment.getBody(),
+                comment.getAuthor() // Ensure this is mapped correctly
         );
     }
+
 }

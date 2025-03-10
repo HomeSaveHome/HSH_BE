@@ -4,10 +4,14 @@ import com.example.HomeSaveHome.BulletinBoard.dto.ArticleForm;
 import com.example.HomeSaveHome.BulletinBoard.entity.Article;
 import com.example.HomeSaveHome.BulletinBoard.repository.ArticleRepository;
 import com.example.HomeSaveHome.BulletinBoard.service.ArticleService;
+import com.example.HomeSaveHome.user.model.User;
+import com.example.HomeSaveHome.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +23,8 @@ public class ArtitcleAPIController {
     private ArticleRepository articleRepository;
     @Autowired
     private ArticleService articleService;
+    @Autowired
+    private UserRepository userRepository;
 
     // GET
     @GetMapping("/api/articles")
@@ -32,11 +38,20 @@ public class ArtitcleAPIController {
     }
 
     // POST
-    @PostMapping("/api/articles")
-    public Article create(@RequestBody ArticleForm dto) {
-        Article article = dto.toEntity();
-        return articleRepository.save(article);
+    @PostMapping("/boards/{boardId}/articles")
+    public ResponseEntity<Article> create(@PathVariable Long boardId, @RequestBody ArticleForm form) {
+        String username = getCurrentUsername();
+        Article article = articleService.createArticle(form, username);
+        return ResponseEntity.status(HttpStatus.CREATED).body(article);
     }
+
+    private String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email);
+        return (user != null) ? user.getUsername() : email;
+    }
+
 
     // PATCH
     @PatchMapping("/api/articles/{id}")

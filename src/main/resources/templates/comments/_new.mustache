@@ -3,12 +3,7 @@
         <div class="card-body">
             <!-- form to create a new comment -->
             <form>
-                <!-- nickname input -->
-                <div class="mb-3">
-                    <label class="form-label">Nickname</label>
-                    <input type="text" class="form-control" id="new-comment-nickname">
 
-                </div>
                 <!-- body input -->
                 <div class="mb-3">
                     <label class="form-label">Content</label>
@@ -16,6 +11,7 @@
                     id="new-comment-body"></textarea>
                 </div>
                 <!-- hidden input -->
+                <input type="hidden" id="board-id" value="{{boardId}}">
                 {{#article}}
                     <input type="hidden" id="new-comment-article-id" value="{{id}}">
                 {{/article}}
@@ -28,32 +24,51 @@
 
 <script>
     {
-        // Parameterization of the comment submission button
-        const commentCreateBtn = document.querySelector("#comment-create-btn");
-        commentCreateBtn.addEventListener("click", function() {
-            const comment = {
-                // new comment's nickname
-                nickname: document.querySelector("#new-comment-nickname").value,
-                // new comment's body
-                body: document.querySelector("#new-comment-body").value,
-                // new comment's parent article id
-                articleId: document.querySelector("#new-comment-article-id").value
-            };
-            console.log(comment);
+        document.addEventListener("DOMContentLoaded", function() {
+            const commentCreateBtn = document.querySelector("#comment-create-btn");
 
-            const url = "/api/articles/" + comment.articleId + "/comments";
-            fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(comment)
-            }).then(response=> {
-                const msg = (response.ok) ? "Comment created successfully!" : "Failed to create comment!";
-                alert(msg);
-                window.location.reload();
+            commentCreateBtn.addEventListener("click", function() {
+                const boardId = document.querySelector("#board-id")?.value;
+                const articleId = document.querySelector("#new-comment-article-id")?.value;
+
+                if (!boardId || !articleId) {
+                    console.error("Board ID or Article ID not found!");
+                    alert("Error: Could not find Board ID or Article ID.");
+                    return;
+                }
+
+                // ✅ Ensure no `id` is included in new comments
+                const comment = {
+                    body: document.querySelector("#new-comment-body").value,
+                    articleId: articleId  // Ensure correct article ID is sent
+                };
+
+                console.log("Sending comment data:", JSON.stringify(comment));
+
+                const url = `/api/boards/${boardId}/articles/${articleId}/comments`;
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(comment)
+                }).then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            alert("Failed to create comment: " + (data.message || "Unknown error"));
+                            throw new Error("Failed to create comment");
+                        });
+                    }
+                    alert("Comment created successfully!");
+                    window.location.reload();
+                }).catch(error => {
+                    console.error("Error creating comment:", error);
+                    alert("Unexpected error occurred!");
+                });
             });
         });
+
 
     }
 </script>

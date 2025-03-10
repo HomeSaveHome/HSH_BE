@@ -5,24 +5,26 @@
     <tr>
         <th scope="col">ID</th>
         <th scope="col">Title</th>
+        <th scope="col">Author</th>
         <th scope="col">Content</th>
+        <th scope="col">Date</th>  <!-- ✅ Uses renamed field -->
     </tr>
     </thead>
     <tbody>
     {{#article}}
-    <tr>
-        <th>{{id}}</th>
-        <td>{{title}}</td>
-        <td>{{content}}</td>
-    </tr>
+        <tr>
+            <th>{{id}}</th>
+            <td>{{title}}</td>
+            <td>{{author}}</td>
+            <td>{{content}}</td>
+            <td>{{formattedDate}}</td>  <!-- ✅ Use the formatted date -->
+        </tr>
     {{/article}}
     </tbody>
 </table>
 
 <a href="/boards/{{boardId}}/articles/{{article.id}}/edit" class="btn btn-primary">Edit</a>
-
 <a href="/boards/{{boardId}}/articles/{{article.id}}/delete" class="btn btn-danger">Delete</a>
-
 <a href="/boards/{{boardId}}/articles">Go to Article List</a>
 
 {{>comments/_comments}}

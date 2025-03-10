@@ -7,8 +7,12 @@ import com.example.HomeSaveHome.BulletinBoard.entity.Board;
 import com.example.HomeSaveHome.BulletinBoard.repository.ArticleRepository;
 import com.example.HomeSaveHome.BulletinBoard.repository.BoardRepository;
 import com.example.HomeSaveHome.BulletinBoard.service.CommentService;
+import com.example.HomeSaveHome.user.model.User;
+import com.example.HomeSaveHome.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +22,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 
@@ -33,6 +39,8 @@ public class ArticleController {
         this.articleRepository = articleRepository;
         this.boardRepository = boardRepository;
     }
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private CommentService commentService;
@@ -41,42 +49,54 @@ public class ArticleController {
         model.addAttribute("boardId", boardId);
         return "articles/new";
     }
+
     @PostMapping("/boards/{boardId}/articles/create")
     public String createArticle(ArticleForm form, @PathVariable Long boardId, Model model) {
-        log.info(form.toString());
 
-        // Ensure the board exists
+        String username = getCurrentUsername();  // ✅ Fetch logged-in username
+
         Board board = boardRepository.findById(boardId).orElse(null);
         if (board == null) {
             return "redirect:/boards"; // Redirect if board doesn't exist
         }
 
-        // Create the article and assign the board
+        // ✅ Ensure the article has the correct author
         Article article = form.toEntity();
-        article.setBoard(board); // ✅ Ensure board is assigned!
+        article.setBoard(board);
+        article.setAuthor(username);  // ✅ Set the author field
 
-        log.info("Saving article: " + article);
         Article saved = articleRepository.save(article);
-        log.info("Saved article: " + saved);
 
         model.addAttribute("boardId", boardId);
         return "redirect:/boards/{boardId}/articles/" + saved.getId(); // Redirect to article view
     }
 
 
-    @GetMapping(("/boards/{boardId}/articles/{id}"))
+    @GetMapping("/boards/{boardId}/articles/{id}")
     public String show(@PathVariable Long id, @PathVariable Long boardId, Model model) {
-        log.info("id = " + id);
-        Article articleEntity = articleRepository.findById(id).orElse(null); // check the id and bring the data
+        log.info("Fetching article with ID: " + id);
+
+        Article articleEntity = articleRepository.findById(id).orElse(null);
+
+        if (articleEntity == null) {
+            log.error("Article not found!");
+            return "redirect:/boards/" + boardId + "/articles"; // Redirect if article doesn't exist
+        }
 
         List<CommentDto> commentDtos = commentService.comments(id);
 
-        model.addAttribute("article", articleEntity); // register the data in the model
+        model.addAttribute("article", articleEntity);
         model.addAttribute("boardId", boardId);
+        model.addAttribute("author", getCurrentUsername());
         model.addAttribute("commentDtos", commentDtos);
-        return "articles/show"; // return the view page
 
+
+        return "articles/show";  // ✅ Mustache file name
     }
+
+
+
+
     @GetMapping("/boards/{boardId}/articles")
     public String index(@PathVariable Long boardId, Model model) {
         Board board = boardRepository.findById(boardId).orElse(null);
@@ -84,14 +104,24 @@ public class ArticleController {
             return "redirect:/boards"; // Redirect if board doesn't exist
         }
 
-        List<Article> articles = articleRepository.findByBoardId(boardId);
-        log.info("Fetched " + articles.size() + " articles for board " + boardId); // ✅ Debugging log
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        model.addAttribute("articleList", articles);
+        // ✅ Convert articles and add a formatted date before sending them to Mustache
+        List<Article> formattedArticles = articleRepository.findByBoardId(boardId).stream()
+                .peek(article -> {
+                    if (article.getDate() != null) {
+                        article.setFormattedDate(article.getDate().format(formatter)); // ✅ Format date
+                    }
+                })
+                .collect(Collectors.toList());
+
+        model.addAttribute("articleList", formattedArticles);
         model.addAttribute("boardId", boardId);
 
         return "articles/index";
     }
+
+
 
 
     @GetMapping(("/boards/{boardId}/articles/{id}/edit"))
@@ -131,5 +161,12 @@ public class ArticleController {
 
         return "redirect:/boards/{boardId}/articles"; // 3. Redirect to the result page
 
+    }
+
+    private String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email);
+        return (user != null) ? user.getUsername() : email;
     }
 }
