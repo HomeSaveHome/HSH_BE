@@ -23,7 +23,8 @@ public class ArtitcleAPIController {
     // GET
     @GetMapping("/api/articles")
     public List<Article> index() {
-        return articleRepository.findAll();
+        // TODO: findByBoardId() should have variable as parameter, not 1L
+        return articleRepository.findByBoardId(1L);
     }
     @GetMapping("/api/articles/{id}")
     public Article show(@PathVariable Long id) {
