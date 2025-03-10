@@ -360,3 +360,10 @@ gradle-app.setting
 src/main/resources/application-secret.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,git,java,maven,eclipse,intellij,gradle,netbeans,visualstudiocode
+
+logs/
+*.out
+*.err
+*.pid
+*.seed
+*.state
