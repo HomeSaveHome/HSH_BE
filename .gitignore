@@ -355,6 +355,15 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
+### IntelliJ ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
 src/main/resources/application-secret.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,git,java,maven,eclipse,intellij,gradle,netbeans,visualstudiocode
