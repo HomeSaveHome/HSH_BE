@@ -7,8 +7,10 @@ import com.example.HomeSaveHome.energy.dto.YearlyEnergyUsedResponse;
 import com.example.HomeSaveHome.energy.entity.EnergyType;
 import com.example.HomeSaveHome.energy.service.EnergyUsedService;
 import com.example.HomeSaveHome.user.model.User;
+import com.example.HomeSaveHome.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -19,14 +21,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@RestController
+@Controller
 @RequestMapping("/energyUsed")
 public class EnergyUsedController {
 
     private final EnergyUsedService energyUsedService;
+    private final UserService userService;
 
-    public EnergyUsedController(EnergyUsedService energyUsedService) {
+    public EnergyUsedController(EnergyUsedService energyUsedService, UserService userService) {
         this.energyUsedService = energyUsedService;
+        this.userService = userService;
     }
 
     // 에너지 사용량 입력
@@ -61,30 +65,34 @@ public class EnergyUsedController {
         return ResponseEntity.ok(energyUsedResponses);
     }
 
-    // 저번 달 에너지 사용량 조회
-    @GetMapping("/last-month")
-    public String getLastMonthEnergyUsed(@RequestParam Long userId, Model model) {
+    // 저번 달 에너지 사용량 조회 & 최근 4개월 월 별 사용량 조회
+    @GetMapping("/month-analytics")
+    public String getMonthUsedAnalytics(Model model) {
+        User currentUser = userService.getCurrentUser();
+        if (currentUser == null) {
+            System.out.println("❌ 현재 로그인한 사용자를 찾을 수 없습니다.");
+            return "redirect:/login"; // 로그인 페이지로 리디렉트
+        }
+
+        Long userId = currentUser.getId();
+        System.out.println(userId);
+
         YearMonth lastMonth = YearMonth.now().minusMonths(1);
+        List<MonthlyEnergyUsedResponse> lastUsage = energyUsedService.getEnergyUsedByMonth(userId, lastMonth.getMonthValue(), lastMonth.getYear());
 
-        List<MonthlyEnergyUsedResponse> lastUsage = energyUsedService.getEnergyUsedByMonth(userId, null, lastMonth.getMonthValue(), lastMonth.getYear());
-        model.addAttribute("lastUsage", lastUsage);
-
-        return "main";
-    }
-
-    // 최근 4개월 에너지 사용량 조회
-    @GetMapping("/usage-analytics")
-    public String getLast4MonthEnergy(@RequestParam Long userId, Model model) {
         Map<String, Map<String, MonthlyEnergyUsedResponse>> usageAnalytics = energyUsedService.getLast4MonthsEnergy(userId);
 
         int maxGasPrice = usageAnalytics.values().stream()
-                .mapToInt(data -> data.getOrDefault("gas", new MonthlyEnergyUsedResponse()).getPrice().intValue())
+                .mapToInt(data -> data.getOrDefault("GAS", new MonthlyEnergyUsedResponse()).getPrice() != null
+                        ? data.get("GAS").getPrice().intValue() : 0)
                 .max().orElse(1);
 
         int maxElectricPrice = usageAnalytics.values().stream()
-                .mapToInt(data -> data.getOrDefault("electric", new MonthlyEnergyUsedResponse()).getPrice().intValue())
+                .mapToInt(data -> data.getOrDefault("ELECTRICITY", new MonthlyEnergyUsedResponse()).getPrice() != null
+                        ? data.get("ELECTRICITY").getPrice().intValue() : 0)
                 .max().orElse(1);
 
+        model.addAttribute("lastUsage", lastUsage);
         model.addAttribute("usageAnalytics", usageAnalytics);
         model.addAttribute("maxGasPrice", maxGasPrice);
         model.addAttribute("maxElectricPrice", maxElectricPrice);
@@ -107,7 +115,7 @@ public class EnergyUsedController {
         if (month == null) month = currentMonth;
 
         // 검색한 월 에너지 사용량 데이터 가져오기
-        List<MonthlyEnergyUsedResponse> currentMonthData = energyUsedService.getEnergyUsedByMonth(userId, null, month, year);
+        List<MonthlyEnergyUsedResponse> currentMonthData = energyUsedService.getEnergyUsedByMonth(userId, month, year);
 
         // 변화율 데이터 가져오기
         Map<EnergyType, Optional<Double>> changeRates = energyUsedService.getUsageChangeRate(userId, currentMonthData);
