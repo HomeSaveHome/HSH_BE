@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,17 +18,20 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     // 회원가입 처리 메서드 (비밀번호 암호화 제거, 평문 그대로 저장)
     public boolean registerUser(User user) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             return false;
         }
         if (userRepository.findByEmail(user.getEmail()) != null) {
             return false;
         }
 
-        // 평문 비밀번호 그대로 저장
-        user.setPassword(user.getPassword());
+        // 비밀번호 암호화
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // 로그 찍기 (이게 중요)
         System.out.println("가입 시도하는 유저 정보: " + user);
@@ -42,7 +46,7 @@ public class UserService {
         if (user != null) {
             System.out.println("DB에 저장된 비밀번호: " + user.getPassword());
             System.out.println("입력된 비밀번호: " + password);
-            if (user.getPassword().equals(password)) {
+            if (passwordEncoder.matches(password, user.getPassword())) {
                 return true;  // 인증 성공
             }
         }
@@ -77,7 +81,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found: " + user.getUsername()));
 
         existingUser.setEmail(user.getEmail());
-        existingUser.setPassword(user.getPassword());  // 평문 비밀번호 그대로 저장
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        } // 평문 비밀번호 그대로 저장
         existingUser.setPoint(user.getPoint());
         existingUser.setLevel(user.getLevel());
         return userRepository.save(existingUser);

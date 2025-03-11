@@ -1,32 +1,39 @@
 package com.example.HomeSaveHome.BulletinBoard.controller;
 
-import com.example.HomeSaveHome.BulletinBoard.dto.ArticleForm;
-import com.example.HomeSaveHome.BulletinBoard.entity.Article;
 import com.example.HomeSaveHome.BulletinBoard.entity.Board;
-import com.example.HomeSaveHome.BulletinBoard.repository.ArticleRepository;
 import com.example.HomeSaveHome.BulletinBoard.repository.BoardRepository;
-import com.example.HomeSaveHome.BulletinBoard.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/boards")
+@Controller
 public class BoardController {
 
-    private final ArticleRepository articleRepository;
     private final BoardRepository boardRepository;
 
     @Autowired
-    public BoardController(ArticleRepository articleRepository, BoardRepository boardRepository) {
-        this.articleRepository = articleRepository;
+    public BoardController(BoardRepository boardRepository) {
         this.boardRepository = boardRepository;
     }
 
+    // Fetch all boards
+    @GetMapping
+    public ResponseEntity<List<Board>> getAllBoards() {
+        List<Board> boards = boardRepository.findAll();
+        return ResponseEntity.ok(boards);
+    }
 
+    @GetMapping("/boards")
+    public String showBoards(Model model) {
+        List<Board> boards = boardRepository.findAll();
+        model.addAttribute("boards", boards);
+        return "boards";
+    }
 
 
 }

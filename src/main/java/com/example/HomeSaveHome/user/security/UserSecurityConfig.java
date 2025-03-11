@@ -43,7 +43,7 @@ public class UserSecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/css/**", "/js/**", "/users/signup", "/users/login", "/users/register").permitAll()  // 로그인 및 회원가입 페이지 접근 허용
-                        .requestMatchers("/mainpage/**").hasRole("USER")  // mainpage는 USER 권한 필요
+                        .requestMatchers("/main/**").hasRole("USER")  // mainpage는 USER 권한 필요
                         .anyRequest().authenticated()  // 그 외의 요청은 인증 필요
                 )
                 .formLogin(login -> login

@@ -12,7 +12,6 @@
     <h3>사용자 정보</h3>
     <p>아이디: <span th:text="${user.username}">[아이디]</span></p>
     <p>이메일: <span th:text="${user.email}">[이메일]</span></p>
-    <p>이름: <span th:text="${user.name}">[이름]</span></p>
 </div>
 
 <div>
@@ -23,9 +22,6 @@
 
         <label for="email">이메일:</label>
         <input type="email" id="email" name="email" value="[[${user.email}]]" required /><br/>
-
-        <label for="name">이름:</label>
-        <input type="text" id="name" name="name" value="[[${user.name}]]" required /><br/>
 
         <button type="submit">수정하기</button>
     </form>
