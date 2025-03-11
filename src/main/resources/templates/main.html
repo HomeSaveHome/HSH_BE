@@ -5,44 +5,69 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>메인 페이지</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
 </head>
 <body>
+<div th:replace="~{header :: header}"></div>
 <div class="main-container">
-    <div th:replace="~{header :: header}"></div>
-    <section class="energy-last-month" th:each="data : ${lastMonthData}">
+    <section class="energy-last-month">
         <h2>저번 달 에너지 사용량</h2>
-        <tbody class="energy-box">
-            <tr th:each="lastMonthData : ${lastMonthData}">
-                <td>
-                    <img th:src="@{'/images/' + ${lastMonthData.energyName} + '.svg'}"
-                         th:alt="${lastMonthData.energyName}"
-                    />
+        <table>
+            <tbody class="energy-box">
+            <tr th:each="data : ${lastUsage}">
+                <td th:class="@{${data.energyType} + '-img'}">
+                    <img th:src="@{'/images/' + ${data.energyType} + '.svg'}"
+                         th:alt="${data.energyType}" />
                 </td>
-                <td>
-                    <span th:if="${lastMonthData == 'gas'}" th:text="가스 사용량"></span>
-                    <span th:if="${lastMonthData == 'electric'}" th:text="전기 사용량"></span>
+                <td class="energyType-name">
+                    <span th:if="${data.energyType.name() == 'GAS'}">가스 사용량</span>
+                    <span th:if="${data.energyType.name() == 'ELECTRICITY'}">전기 사용량</span>
                 </td>
-                <td th:text="'₩ ' + ${lastMonthData.price}"></td>
+                <td class="last-month-price">
+                    <span th:if="${data.price != null}" th:text="'₩ ' + ${data.price}"></span>
+                    <span th:unless="${data.price != null}">전 월 사용량 없음</span>
+                </td>
             </tr>
-        </tbody>
+            </tbody>
+        </table>
     </section>
     <section class="energy-analytics">
-        <h2>Usage Analytics</h2>
+        <div class="energy-analytics-header">
+            <h2>Usage Analytics</h2>
+            <a href="#">
+                <img src="/images/plus.svg" alt="plus">
+            </a>
+        </div>
         <div class="chart">
-            <div class="bar" th:each="analytic : ${usageAnalytics}">
-                <span th:text="${analytic.key}"></span>
-                <div class="bar-gas"
-                     th:style="'width: ' + ${analytic.value['gas']?.price} * 100 / ${maxGasPrice} + '%'"
-                     th:text="'₩ ' + ${analytic.value['gas']?.price}">
-                </div>
-                <div class="bar-electric"
-                     th:style="'width: ' + ${analytic.value['electric']?.price} * 100 / ${maxElectricPrice} + '%'"
-                     th:text="'₩ ' + ${analytic.value['electric']?.price}">
+            <div class="bar-container" th:each="analytic : ${usageAnalytics}">
+                <span class="month-label" th:text="${analytic.key}"></span>
+                <div class="bar-wrapper">
+                    <div class="bar gas"
+                         th:classappend="${analytic.value['GAS']?.price == null} ? 'no-data'"
+                         th:style="'width: ' + (${analytic.value['GAS']?.price != null and maxGasPrice > 0} ? ${analytic.value['GAS']?.price} * 100 / ${maxGasPrice} : 100) + '%'"
+                         th:text="${analytic.value['GAS']?.price != null} ? '₩ ' + ${analytic.value['GAS']?.price} : '전 월 값이 없습니다'">
+                    </div>
+                    <div class="bar electric"
+                         th:classappend="${analytic.value['ELECTRICITY']?.price == null} ? 'no-data'"
+                         th:style="'width: ' + (${analytic.value['ELECTRICITY']?.price != null and maxElectricPrice > 0} ? ${analytic.value['ELECTRICITY']?.price} * 100 / ${maxElectricPrice} : 100) + '%'"
+                         th:text="${analytic.value['ELECTRICITY']?.price != null} ? '₩ ' + ${analytic.value['ELECTRICITY']?.price} : '전 월 값이 없습니다'">
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/energyUsed/month-analytics")
+            .then(response => response.text()) // JSON 대신 HTML 렌더링
+            .then(html => {
+                document.body.innerHTML = html;
+            })
+            .catch(error => console.error("❌ 데이터 로드 실패:", error));
+    });
+</script>
 </body>
 </html>

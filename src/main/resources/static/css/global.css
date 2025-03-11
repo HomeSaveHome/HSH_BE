@@ -53,4 +53,8 @@
 body {
     font-family: var(--font-family);
     background-color: white;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
