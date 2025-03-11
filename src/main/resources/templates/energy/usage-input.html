@@ -5,14 +5,16 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>에너지 사용량 입력</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/energy/usage-input.css}">
     <script defer th:src="@{/js/energy.js}"></script>
 </head>
 <body>
 <div th:replace="~{header :: header}"></div>
 <div class="usage-input-container">
     <h2>에너지 사용량 입력</h2>
-    <form th:action="@{/energy/save}" th:object="${energyUsedRequest}" method="post">
+    <form th:action="@{/energyUsed/save}" th:object="${energyUsedRequest}" method="post">
         <!-- 에너지 선택 -->
         <div class="energy-selector">
             <button type="button" class="energy-btn" data-energy="1" data-unit="m³">가스</button>
@@ -21,49 +23,50 @@
         </div>
 
         <!-- 연도 & 월 선택 -->
-        <div class="year-selector">
-            <button type="button" class="prev-year">&lt;</button>
-            <span id="year-display">2025</span>
-            <button type="button" class="next-year">&gt;</button>
-            <input type="hidden" th:field="*{year}" id="selectedYear" value="2025">
-        </div>
-        <div class="month-grid">
-            <button type="button" class="month-btn" data-month="1">JAN</button>
-            <button type="button" class="month-btn" data-month="2">FEB</button>
-            <button type="button" class="month-btn" data-month="3">MAR</button>
-            <button type="button" class="month-btn" data-month="4">APR</button>
-            <button type="button" class="month-btn" data-month="5">MAY</button>
-            <button type="button" class="month-btn" data-month="6">JUN</button>
-            <button type="button" class="month-btn" data-month="7">JUL</button>
-            <button type="button" class="month-btn" data-month="8">AUG</button>
-            <button type="button" class="month-btn" data-month="9">SEP</button>
-            <button type="button" class="month-btn" data-month="10">OCT</button>
-            <button type="button" class="month-btn" data-month="11">NOV</button>
-            <button type="button" class="month-btn" data-month="12">DEC</button>
-        </div>
-        <input type="hidden" th:field="*{month}" id="selectedMonth">
+        <div class="selector-bottom">
+            <div class="selector-left">
+                <div class="year-selector">
+                    <button type="button" id="prevYear">
+                        <img src="/images/left-arrow.svg" alt="left-arrow">
+                    </button>
+                    <span id="year-display">2025</span>
+                    <button type="button" id="nextYear">
+                        <img src="/images/right-arrow.svg" alt="right-arrow">
+                    </button>
+                    <input type="hidden" th:field="*{year}" id="selectedYear" value="2025">
+                </div>
+                <div class="month-grid">
+                    <button type="button" class="month-btn" data-month="1">JAN</button>
+                    <button type="button" class="month-btn" data-month="2">FEB</button>
+                    <button type="button" class="month-btn" data-month="3">MAR</button>
+                    <button type="button" class="month-btn" data-month="4">APR</button>
+                    <button type="button" class="month-btn" data-month="5">MAY</button>
+                    <button type="button" class="month-btn" data-month="6">JUN</button>
+                    <button type="button" class="month-btn" data-month="7">JUL</button>
+                    <button type="button" class="month-btn" data-month="8">AUG</button>
+                    <button type="button" class="month-btn" data-month="9">SEP</button>
+                    <button type="button" class="month-btn" data-month="10">OCT</button>
+                    <button type="button" class="month-btn" data-month="11">NOV</button>
+                    <button type="button" class="month-btn" data-month="12">DEC</button>
+                </div>
+            </div>
 
-        <!-- 사용량 및 요금 입력 -->
-        <div class="input-box">
-            <input type="number" th:field="*{amount}" placeholder="사용량을 입력해주세요" required>
-            <span id="unit-label">kWh</span>
-        </div>
-        <div class="input-box">
-            <input type="number" th:field="*{price}" placeholder="요금을 입력해주세요" required> 원
-        </div>
+            <input type="hidden" th:field="*{month}" id="selectedMonth">
 
-        <button type="submit" class="submit-btn">입력 완료</button>
+            <div class="selector-right">
+                <!-- 사용량 및 요금 입력 -->
+                <div class="input-box">
+                    <input type="number" th:field="*{amount}" placeholder="사용량을 입력해주세요" required>
+                    <span id="unit-label">kWh</span>
+                </div>
+                <div class="input-box">
+                    <input type="number" th:field="*{price}" placeholder="요금을 입력해주세요" required>
+                    <span>원</span>
+                </div>
+
+                <button type="submit" class="submit-btn">사용량 입력 완료🔥</button>
+            </div>
+        </div>
     </form>
-    <script>
-        function selectEnergy(type) {
-            window.location.href = "/energy/input?energy=" + type;
-        }
-        function prevYear() {
-            window.location.href = "/energy/input?year=" + (parseInt(document.querySelector('.year-month-selector span').innerText) - 1);
-        }
-        function nextYear() {
-            window.location.href = "/energy/input?year=" + (parseInt(document.querySelector('.year-month-selector span').innerText) + 1);
-        }
-    </script>
 </div>
 </body>
