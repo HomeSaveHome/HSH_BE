@@ -21,8 +21,12 @@ public class EnergyService {
         return energyRepository.findAll();
     }
 
-    public Optional<Energy> getEnergyByName(EnergyType energyType) {
+    public Optional<Energy> getEnergyByType(EnergyType energyType) {
         return energyRepository.findByEnergyType(energyType);
+    }
+
+    public Optional<Energy> getEnergyById(Long id) {
+        return energyRepository.findById(id);
     }
 
     public Energy saveEnergy(Energy energy) {

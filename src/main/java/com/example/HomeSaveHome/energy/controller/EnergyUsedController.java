@@ -37,22 +37,38 @@ public class EnergyUsedController {
     @GetMapping("/input")
     public String showEnergyInputForm(Model model) {
         model.addAttribute("energyUsedRequest", new EnergyUsedRequest());
-        return "usage-input";
+        return "energy/usage-input";
     }
 
     @PostMapping("/save")
-    public String addEnergyUsage(@AuthenticationPrincipal User user,  // 로그인한 유저 정보 가져오기
-                                 @ModelAttribute EnergyUsedRequest request,
+    public String addEnergyUsage(@ModelAttribute EnergyUsedRequest request,
                                  RedirectAttributes redirectAttributes) {
+        User currentUser = userService.getCurrentUser();
+        if (currentUser == null) {
+            System.out.println("❌ 현재 로그인한 사용자를 찾을 수 없습니다.");
+            return "redirect:/login"; // 로그인 페이지로 리디렉트
+        }
+
+        Long userId = currentUser.getId();
+
         try {
-            request.setUserId(user.getId());
+            request.setUserId(userId);
             energyUsedService.saveEnergyUsage(request);
             redirectAttributes.addFlashAttribute("successMessage", "에너지 사용량이 성공적으로 등록되었습니다.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "에너지 사용량 저장 중 오류 발생: " + e.getMessage());
         }
 
-        return "redirect:/energy";
+        return "redirect:/main";
+    }
+
+    // 에너지 사용량이 있는 월 조회
+    @GetMapping("/used-months/{year}/{energyId}")
+    @ResponseBody
+    public List<Integer> getUsedMonths(@PathVariable int year, @PathVariable Long energyId) {
+        Long userId = userService.getCurrentUser().getId();
+
+        return energyUsedService.getUsedMonthsByYear(userId, year, energyId);
     }
 
     @GetMapping("/{energyId}")

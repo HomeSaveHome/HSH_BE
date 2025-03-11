@@ -26,7 +26,7 @@ public class EnergyController {
 
     @GetMapping("/{energyType}")
     public ResponseEntity<Energy> getEnergyByType(@PathVariable EnergyType energyType) {
-        Optional<Energy> energy = energyService.getEnergyByName(energyType);
+        Optional<Energy> energy = energyService.getEnergyByType(energyType);
         return energy.map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
     }

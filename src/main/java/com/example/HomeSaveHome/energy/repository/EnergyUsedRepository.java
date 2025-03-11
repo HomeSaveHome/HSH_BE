@@ -35,4 +35,7 @@ public interface EnergyUsedRepository extends JpaRepository<EnergyUsed, Long> {
             "GROUP BY e.energy.energyType, e.year " +
             "ORDER BY e.year ASC")
     Map<EnergyType, Long> getYearlyAvgEnergyUsed(User user, Energy energy, int year);
+
+    @Query("SELECT DISTINCT e.month FROM EnergyUsed e WHERE e.user = :user AND e.year = :year AND e.energy = :energy")
+    List<Integer> findUsedMonthsByUserAndYear(User user, int year, Energy energy);
 }

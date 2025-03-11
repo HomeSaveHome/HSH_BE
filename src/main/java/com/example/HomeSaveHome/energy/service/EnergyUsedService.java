@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 public class EnergyUsedService {
 
     private final EnergyUsedRepository energyUsedRepository;
-    private final EnergyRepository energyRepository;
+    private final EnergyService energyService;
     private final UserRepository userRepository;
 
-    public EnergyUsedService(EnergyUsedRepository energyUsedRepository, EnergyRepository energyRepository, UserRepository userRepository) {
+    public EnergyUsedService(EnergyUsedRepository energyUsedRepository, EnergyService energyService, UserRepository userRepository) {
         this.energyUsedRepository = energyUsedRepository;
-        this.energyRepository = energyRepository;
+        this.energyService = energyService;
         this.userRepository = userRepository;
     }
 
@@ -136,7 +136,7 @@ public class EnergyUsedService {
     }
 
     private Energy getEnergyById(Long energyId) {
-        return energyRepository.findById(energyId)
+        return energyService.getEnergyById(energyId)
                 .orElseThrow(() -> new RuntimeException("해당 에너지가 존재하지 않습니다."));
     }
 
@@ -305,5 +305,11 @@ public class EnergyUsedService {
         result.put(EnergyType.ELECTRICITY, electricityChangeRate);
 
         return result;
+    }
+
+    public List<Integer> getUsedMonthsByYear(Long userId, int year, Long energyId) {
+        User user = getUserById(userId);
+        Energy energy = getEnergyById(energyId);
+        return energyUsedRepository.findUsedMonthsByUserAndYear(user, year, energy);
     }
 }
