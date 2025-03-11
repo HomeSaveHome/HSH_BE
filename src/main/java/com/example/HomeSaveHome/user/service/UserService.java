@@ -66,7 +66,8 @@ public class UserService {
 
     // 현재 로그인된 사용자 반환 (SecurityContext 활용)
     public User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = userRepository.findByEmail(email).getUsername();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
     }
