@@ -69,31 +69,42 @@ public class EnergyUsedService {
     }
 
     // 특정 월 에너지 사용량 조회
-    public List<MonthlyEnergyUsedResponse> getEnergyUsedByMonth(Long userId, Long energyId, int month, int year) {
+    public List<MonthlyEnergyUsedResponse> getEnergyUsedByMonth(Long userId, int month, int year) {
         if (month < 1 || month > 12) {
             throw new IllegalArgumentException("월은 1~12 사이의 값이어야 합니다.");
         }
 
         User user = getUserById(userId);
+        Energy gasEnergy = getEnergyById(1L);
+        Energy electricityEnergy = getEnergyById(2L);
 
-        List<EnergyUsed> energyUsedList;
-        if (energyId != null) {
-            Energy energy = getEnergyById(energyId);
-            energyUsedList = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, energy, month, year);
+        List<MonthlyEnergyUsedResponse> energyUsedList = new ArrayList<>();
+
+        // 가스 사용량 조회
+        List<EnergyUsed> gasEnergyUsed = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, gasEnergy, month, year);
+        if (gasEnergyUsed.isEmpty()) {
+            energyUsedList.add(new MonthlyEnergyUsedResponse(null, EnergyType.GAS, year, month, 0.0, null));
         } else {
-            energyUsedList = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, null, month, year);
+            energyUsedList.addAll(
+                    gasEnergyUsed.stream()
+                            .map(e -> new MonthlyEnergyUsedResponse(e.getId(), EnergyType.GAS, year, month, e.getAmount(), e.getPrice()))
+                            .toList()
+            );
         }
 
-        return energyUsedList.stream()
-                .map(e -> new MonthlyEnergyUsedResponse(
-                        e.getId(),
-                        e.getEnergy().getEnergyType(),
-                        e.getYear(),
-                        e.getMonth(),
-                        e.getAmount(),
-                        e.getPrice()
-                ))
-                .collect(Collectors.toList());
+        // 전기 사용량 조회
+        List<EnergyUsed> electricityEnergyUsed = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, electricityEnergy, month, year);
+        if (electricityEnergyUsed.isEmpty()) {
+            energyUsedList.add(new MonthlyEnergyUsedResponse(null, EnergyType.ELECTRICITY, year, month, 0.0, null));
+        } else {
+            energyUsedList.addAll(
+                    electricityEnergyUsed.stream()
+                            .map(e -> new MonthlyEnergyUsedResponse(e.getId(), EnergyType.ELECTRICITY, year, month, e.getAmount(), e.getPrice()))
+                            .toList()
+            );
+        }
+
+        return energyUsedList;
     }
 
     // 연도별 총 사용량과 가격 계산
@@ -139,7 +150,7 @@ public class EnergyUsedService {
             int monthValue = targetMonth.getMonthValue();
             int yearValue = targetMonth.getYear();
 
-            List<MonthlyEnergyUsedResponse> responseList = getEnergyUsedByMonth(userId, null, monthValue, yearValue);
+            List<MonthlyEnergyUsedResponse> responseList = getEnergyUsedByMonth(userId, monthValue, yearValue);
 
             Map<String, MonthlyEnergyUsedResponse> monthData = new HashMap<>();
             for (MonthlyEnergyUsedResponse response : responseList) {
@@ -158,7 +169,7 @@ public class EnergyUsedService {
             return Collections.emptyMap();
         }
 
-        List<MonthlyEnergyUsedResponse> previousYearData = getEnergyUsedByMonth(userId, null, currentMonthData.get(0).getMonth(), currentMonthData.get(0).getYear() - 1);
+        List<MonthlyEnergyUsedResponse> previousYearData = getEnergyUsedByMonth(userId, currentMonthData.get(0).getMonth(), currentMonthData.get(0).getYear() - 1);
 
         Long gasUsageCurrent = null;
         Long electricityUsageCurrent = null;
