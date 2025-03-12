@@ -7,13 +7,16 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .board-container {
-            width: 80%;
-            max-width: 900px;
-            margin: 120px auto 50px auto;
-            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 30px;
             background: white;
             border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
         .board-header {
             display: flex;
@@ -66,6 +69,7 @@
             display: flex;
             justify-content: flex-end;
             margin-top: 15px;
+            margin-bottom: -50px;
         }
         .new-post-btn {
             background-color: #FDD835;
@@ -84,7 +88,7 @@
         .browse-boards-container {
             display: flex;
             justify-content: center;
-            margin-top: 30px;
+            margin-top: -10px;
         }
         .browse-boards-btn {
             background-color: #104911;
@@ -97,6 +101,26 @@
             transition: 0.3s;
         }
         .browse-boards-btn:hover {
+            background-color: #0b3c0d;
+        }
+
+        .pagination-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .pagination-btn {
+            background-color: #104911;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+            margin: 0 10px;
+        }
+
+        .pagination-btn:hover {
             background-color: #0b3c0d;
         }
     </style>
@@ -127,7 +151,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="article : ${articleList}">
+        <tr th:each="article : ${articlePage.content}">
             <td><a th:href="@{/boards/{boardId}/articles/{id}(boardId=${boardId}, id=${article.id})}" th:text="${article.title}"></a></td>
             <td th:text="${article.author}"></td>
             <td th:text="${article.formattedDate}"></td>
@@ -158,5 +182,21 @@
     }
 </script>
 
+
+
+<!-- ✅ Pagination Controls -->
+<div class="pagination-container">
+    <a th:if="${currentPage > 0}" th:href="@{/boards/{boardId}/articles(boardId=${boardId}, page=${currentPage - 1}, size=7)}" class="pagination-btn">⬅ Previous</a>
+
+    <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+
+    <a th:if="${currentPage + 1 < totalPages}" th:href="@{/boards/{boardId}/articles(boardId=${boardId}, page=${currentPage + 1}, size=7)}" class="pagination-btn">Next ➡</a>
+</div>
+
+
+
+
 </body>
+
+
 </html>

@@ -49,13 +49,14 @@ public class LikeController {
 
 
 
-    @GetMapping("/articles/{articleId}")
-    public ResponseEntity<List<User>> getUsersWhoLikedArticle(@PathVariable Long articleId) {
+    @GetMapping("/articles/{articleId}/users")
+    public ResponseEntity<List<String>> getUsersWhoLikedArticle(@PathVariable Long articleId) {
         return ResponseEntity.ok(likeService.getUsersWhoLikedArticle(articleId));
     }
 
-    @GetMapping("/comments/{commentId}")
-    public ResponseEntity<List<User>> getUsersWhoLikedComment(@PathVariable Long commentId) {
+    @GetMapping("/comments/{commentId}/users")
+    public ResponseEntity<List<String>> getUsersWhoLikedComment(@PathVariable Long commentId) {
         return ResponseEntity.ok(likeService.getUsersWhoLikedComment(commentId));
     }
+
 }

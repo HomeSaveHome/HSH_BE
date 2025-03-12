@@ -11,6 +11,9 @@ import com.example.HomeSaveHome.user.model.User;
 import com.example.HomeSaveHome.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.format.DateTimeFormatter;
@@ -112,11 +116,17 @@ public class ArticleController {
 
 
     @GetMapping("/boards/{boardId}/articles")
-    public String index(@PathVariable Long boardId, Model model) {
+    public String index(@PathVariable Long boardId,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "7") int size,
+                        Model model) {
         Board board = boardRepository.findById(boardId).orElse(null);
         if (board == null) {
             return "redirect:/boards"; // Redirect if board doesn't exist
         }
+
+        Page<Article> articlePage = articleRepository.findByBoardId(boardId, PageRequest.of(page, size, Sort.by("date").descending()));
+
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -132,7 +142,9 @@ public class ArticleController {
         model.addAttribute("articleList", formattedArticles);
         model.addAttribute("boardId", boardId);
         model.addAttribute("boardName", board.getName());
-
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", articlePage.getTotalPages());
+        model.addAttribute("articlePage", articlePage);
         return "articles/index";
     }
 

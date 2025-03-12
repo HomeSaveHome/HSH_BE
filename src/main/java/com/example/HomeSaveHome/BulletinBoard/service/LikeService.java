@@ -56,15 +56,16 @@ public class LikeService {
         return "Liked successfully!";
     }
 
-    public List<User> getUsersWhoLikedArticle(Long articleId) {
+    public List<String> getUsersWhoLikedArticle(Long articleId) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new RuntimeException("Article not found!"));
-        return likeRepository.findByArticle(article).stream().map(Like::getUser).toList();
+        return likeRepository.findByArticle(article).stream().map(like -> like.getUser().getUsername()).toList();
     }
 
-    public List<User> getUsersWhoLikedComment(Long commentId) {
+    public List<String> getUsersWhoLikedComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found!"));
-        return likeRepository.findByComment(comment).stream().map(Like::getUser).toList();
+        return likeRepository.findByComment(comment).stream().map(like -> like.getUser().getUsername()).toList();
     }
+
 }
