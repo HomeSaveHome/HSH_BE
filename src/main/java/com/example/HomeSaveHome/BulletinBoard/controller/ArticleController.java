@@ -13,13 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.format.DateTimeFormatter;
@@ -67,6 +65,12 @@ public class ArticleController {
 
         Article saved = articleRepository.save(article);
 
+        // Increasing user's point when writing an article
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found")); // ✅ Handle Optional
+        user.setPoint(user.getPoint() + 10);
+        userRepository.save(user);
+
         model.addAttribute("boardId", boardId);
         return "redirect:/boards/{boardId}/articles/" + saved.getId(); // Redirect to article view
     }
@@ -74,7 +78,6 @@ public class ArticleController {
 
     @GetMapping("/boards/{boardId}/articles/{id}")
     public String show(@PathVariable Long id, @PathVariable Long boardId, Model model) {
-        log.info("Fetching article with ID: " + id);
 
         Article articleEntity = articleRepository.findById(id).orElse(null);
 
@@ -83,12 +86,23 @@ public class ArticleController {
             return "redirect:/boards/" + boardId + "/articles"; // Redirect if article doesn't exist
         }
 
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        // ✅ Format date before sending it to Mustache
+        if (articleEntity.getDate() != null) {
+            articleEntity.setFormattedDate(articleEntity.getDate().format(formatter));
+        }
+        String loggedUsername = getCurrentUsername();
+
         List<CommentDto> commentDtos = commentService.comments(id);
 
         model.addAttribute("article", articleEntity);
         model.addAttribute("boardId", boardId);
         model.addAttribute("author", getCurrentUsername());
         model.addAttribute("commentDtos", commentDtos);
+        model.addAttribute("boardName", articleEntity.getBoard().getName());
+        model.addAttribute("loggedUsername", loggedUsername);
 
 
         return "articles/show";  // ✅ Mustache file name
@@ -117,6 +131,7 @@ public class ArticleController {
 
         model.addAttribute("articleList", formattedArticles);
         model.addAttribute("boardId", boardId);
+        model.addAttribute("boardName", board.getName());
 
         return "articles/index";
     }
@@ -131,23 +146,24 @@ public class ArticleController {
         model.addAttribute("boardId", boardId);
         return "articles/edit"; // set the view page
     }
+
     @PostMapping("/boards/{boardId}/articles/update")
     public String update(ArticleForm form, @PathVariable Long boardId) {
-        Article articleEntity = form.toEntity();
-
-        // Retrieve the existing article from the database
-        Article existingArticle = articleRepository.findById(articleEntity.getId()).orElse(null);
+        Article existingArticle = articleRepository.findById(form.getId()).orElse(null);
 
         if (existingArticle != null) {
-            // ✅ Preserve the existing board reference
-            articleEntity.setBoard(existingArticle.getBoard());
+            existingArticle.setTitle(form.getTitle());
+            existingArticle.setContent(form.getContent());
+            // ✅ Preserve the author field
+            existingArticle.setAuthor(existingArticle.getAuthor());
 
-            log.info("Updating article: " + articleEntity);
-            articleRepository.save(articleEntity);
+            log.info("Updating article: " + existingArticle);
+            articleRepository.save(existingArticle);
         }
 
-        return "redirect:/boards/" + boardId + "/articles/" + articleEntity.getId();
+        return "redirect:/boards/" + boardId + "/articles/" + form.getId();
     }
+
 
 
     @GetMapping("/boards/{boardId}/articles/{id}/delete")
@@ -158,6 +174,13 @@ public class ArticleController {
             articleRepository.delete(target);
             rttr.addFlashAttribute("msg", "Article Deleted.");
         }
+
+
+        String username = getCurrentUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found")); // ✅ Handle Optional
+        user.setPoint(user.getPoint() - 10);
+        userRepository.save(user);
 
         return "redirect:/boards/{boardId}/articles"; // 3. Redirect to the result page
 

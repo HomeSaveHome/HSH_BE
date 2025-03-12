@@ -40,13 +40,41 @@ public class CommentAPIController {
         return ResponseEntity.status(HttpStatus.CREATED).body(commentDto);
     }
     // 3. Update comments
-    @PatchMapping("/api/comments/{id}")
-    public ResponseEntity<CommentDto> update(@PathVariable Long id, @RequestBody CommentDto dto) {
-        // Use commentService to update comments
-        CommentDto updatedDto = commentService.update(id, dto);
-        // Return result
-        return ResponseEntity.status(HttpStatus.OK).body(updatedDto);
+
+    @PostMapping("api/comments/{id}/update") // ✅ Handles form-based comment updates
+    public ResponseEntity<?> updateCommentForm(@PathVariable Long id, @ModelAttribute CommentDto dto) {
+        try {
+            CommentDto updatedDto = commentService.update(id, dto);
+            return ResponseEntity.ok(updatedDto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: Comment not found.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update comment.");
+        }
     }
+
+    @PatchMapping("/api/comments/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody CommentDto dto) {
+        // ✅ Check if request body is empty or invalid
+        if (dto == null || dto.getBody() == null || dto.getBody().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Comment body cannot be empty.");
+        }
+
+        try {
+            // ✅ Use commentService to update the comment
+            CommentDto updatedDto = commentService.update(id, dto);
+
+            // ✅ Check if the update was successful
+            if (updatedDto == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found.");
+            }
+
+            return ResponseEntity.ok(updatedDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update comment.");
+        }
+    }
+
     // 4. Delete comments
     @DeleteMapping("/api/comments/{id}")
     public ResponseEntity<CommentDto> delete(@PathVariable Long id) {

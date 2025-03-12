@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 
 @NoArgsConstructor
@@ -18,8 +19,10 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
+    @Setter
     private String title;
     @Column
+    @Setter
     private String content;
     @Setter
     @Column
@@ -38,6 +41,9 @@ public class Article {
     @Transient
     private String formattedDate;
 
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
     public void patch(Article article) {
         if (article.title != null) {
             this.title = article.title;
@@ -55,5 +61,6 @@ public class Article {
         this.date = date;
         this.board = board;
     }
+
 
 }

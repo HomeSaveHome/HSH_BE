@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Comment</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .content-container {
+            margin-top: 100px;
+            width: 90%;
+            max-width: 600px;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #104911;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #0b3c0d;
+        }
+
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #104911;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="content-container">
+    <h2>Edit Comment</h2>
+
+    <form id="comment-edit-form">
+        <input type="hidden" id="edit-comment-id" th:value="${comment.id}">
+        <input type="hidden" id="edit-comment-article-id" th:value="${comment.article.id}">
+        <input type="hidden" id="edit-comment-board-id" th:value="${comment.article.board.id}">
+
+        <div class="form-group">
+            <label class="form-label">Content</label>
+            <textarea class="form-control" rows="5" id="edit-comment-body" th:text="${comment.body}" required></textarea>
+        </div>
+
+        <button type="button" class="submit-btn" onclick="submitPatch()">Update Comment</button>
+    </form>
+
+    <script>
+        function submitPatch() {
+            let commentId = document.getElementById("edit-comment-id").value;
+            let body = document.getElementById("edit-comment-body").value;
+            let articleId = document.getElementById("edit-comment-article-id").value;
+            let boardId = document.getElementById("edit-comment-board-id").value;
+
+            fetch(`/api/comments/${commentId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: commentId, body: body })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Comment updated successfully!");
+
+                        // ✅ Redirect to the original article page
+                        window.location.href = `/boards/${boardId}/articles/${articleId}`;
+                    } else {
+                        alert("Failed to update comment!");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Article</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* ✅ Fixed header styling */
+        .header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        /* ✅ Ensure content does not overlap with the fixed header */
+        .content-container {
+            margin-top: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            width: 100%;
+        }
+
+        .form-container {
+            width: 90%;
+            max-width: 900px;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #104911;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #0b3c0d;
+        }
+
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #104911;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ Include the header -->
+<div class="header-container">
+    <div th:replace="header :: header"></div>
+</div>
+
+<div class="content-container">
+    <div class="form-container">
+        <h2>Create a New Article</h2>
+
+        <form th:action="@{/boards/{boardId}/articles/create(boardId=${boardId})}" method="post">
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" class="form-control" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Content</label>
+                <textarea class="form-control" rows="10" name="content" required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit</button>
+            <a th:href="@{/boards/{boardId}/articles(boardId=${boardId})}" class="back-btn">Back</a>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

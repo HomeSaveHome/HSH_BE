@@ -1,0 +1,72 @@
+<style>
+    .comment-card {
+        border-bottom: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+
+    .comment-body {
+        padding-left: 10px;
+        font-size: 16px;
+        color: #333;
+    }
+
+    /* Additional styling for modal */
+    .modal-dialog {
+        max-width: 600px;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+
+    .btn-primary, .btn-danger {
+        padding: 8px 16px !important;
+        border-radius: 5px !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        display: inline-block !important;
+        font-size: 14px !important;
+        border: none !important;
+    }
+
+    .btn-primary {
+        background-color: #104911 !important; /* Bootstrap blue */
+    }
+
+    .btn-danger {
+        background-color: #dc3545 !important; /* Bootstrap red */
+    }
+</style>
+
+<div id="comments-list">
+    <div th:each="comment : ${commentDtos}" class="comment-card">
+        <div class="comment-header">
+            <strong th:text="${comment.author}"></strong>
+            <div th:if="${loggedUsername == comment.author}">
+                <a th:href="@{/comments/{commentId}/edit(commentId=${comment.id})}"
+                   class="btn btn-primary btn-sm text-white" style="padding: 8px 16px; border-radius: 5px;">
+                    Edit
+                </a>
+                <form th:action="@{/comments/{commentId}/delete(commentId=${comment.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm text-white" style="padding: 8px 16px; border-radius: 5px;">
+                        Delete
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+        <div class="comment-body">
+            <p th:text="${comment.body}"></p>
+        </div>
+    </div>
+</div>
+

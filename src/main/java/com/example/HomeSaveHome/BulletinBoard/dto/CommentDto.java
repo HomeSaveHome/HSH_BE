@@ -16,13 +16,15 @@ public class CommentDto {
     private Long articleId;
     private String body;
     private String author;
+    private Long boardId;
 
-    public static CommentDto createCommentDto(Comment comment) {
+    public static CommentDto createCommentDto(Comment comment, Long boardId) {
         return new CommentDto(
                 comment.getId(),
                 comment.getArticle().getId(),
                 comment.getBody(),
-                comment.getAuthor() // Ensure this is mapped correctly
+                comment.getAuthor(), // Ensure this is mapped correctly
+                boardId
         );
     }
 
