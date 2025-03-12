@@ -110,23 +110,26 @@ public class EnergyUsedService {
     public List<YearlyEnergyUsedResponse> getYearlyEnergyUsed(Long userId, Long energyId, int year) {
         User user = getUserById(userId);
 
-        List<Object[]> energyUsedList;
+        List<Object[]> energyUsedList = energyUsedRepository.findByUserAndYear(user, year);
+        List<YearlyEnergyUsedResponse> yearlyEnergyUsedList = new ArrayList<>();
 
-        if (energyId != null) {
-            Energy energy = getEnergyById(energyId);
-            energyUsedList = energyUsedRepository.getYearlyEnergyUsed(user, energy, year);
-        } else {
-            energyUsedList = energyUsedRepository.getYearlyEnergyUsed(user, null, year);
+        for (Object[] objects : energyUsedList) {
+            EnergyType energyType = (EnergyType) objects[0];
+            Integer responseYear = (Integer) objects[1];
+            Double totalAmount = (Double) objects[2];
+            Long totalPrice = (Long) objects[3];
+
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(energyType, responseYear, totalAmount, totalPrice));
         }
 
-        return energyUsedList.stream()
-                .map(e -> new YearlyEnergyUsedResponse(
-                        (EnergyType) e[0],  // energyType
-                        (Integer) e[1], // energyId
-                        (Double) e[2], // totalAmount
-                        (Long) e[3] // totalPrice
-                ))
-                .collect(Collectors.toList());
+        if (yearlyEnergyUsedList.stream().noneMatch(r -> r.getEnergyType() == EnergyType.GAS)) {
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.GAS, year, 0.0, 0L));
+        }
+        if (yearlyEnergyUsedList.stream().noneMatch(r -> r.getEnergyType() == EnergyType.ELECTRICITY)) {
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.ELECTRICITY, year, 0.0, 0L));
+        }
+
+        return yearlyEnergyUsedList;
     }
 
     private User getUserById(Long userId) {
@@ -211,15 +214,19 @@ public class EnergyUsedService {
     public Map<EnergyType, Long> getEvgUsed(Long userId, Long energyId, int year) {
         User user = getUserById(userId);
 
-        Map<EnergyType, Long> avgUsageMap;
+        List<Object[]> resultList;
         if (energyId != null) {
             Energy energy = getEnergyById(energyId);
-            avgUsageMap = energyUsedRepository.getYearlyAvgEnergyUsed(user, energy, year);
+            resultList = energyUsedRepository.getYearlyAvgEnergyUsed(user, energy, year);
         } else {
-            avgUsageMap = energyUsedRepository.getYearlyAvgEnergyUsed(user, null, year);
+            resultList = energyUsedRepository.getYearlyAvgEnergyUsed(user, null, year);
         }
 
-        return avgUsageMap;
+        return resultList.stream()
+                .collect(Collectors.toMap(
+                        row -> (EnergyType) row[0],
+                        row -> ((Number) row[1]).longValue()
+                ));
     }
 
     // 특정 연도 사용 변화율 계산

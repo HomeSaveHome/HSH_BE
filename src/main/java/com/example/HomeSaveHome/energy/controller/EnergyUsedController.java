@@ -145,9 +145,10 @@ public class EnergyUsedController {
     // 연도 별 에너지 사용량 조회
     @GetMapping("/yearly")
     public String getYearlyEnergyUsed(
-            @RequestParam Long userId,
             @RequestParam(value = "year", required = false) Integer year,
             Model model) {
+        Long userId = userService.getCurrentUser().getId();
+
         LocalDate now = LocalDate.now();
         int currentYear = now.getYear();
 
@@ -167,6 +168,6 @@ public class EnergyUsedController {
         model.addAttribute("yearlyChangeRates", yearlyChangeRates);
         model.addAttribute("avgChangeRates", avgChangeRates);
 
-        return "yearly-usage";
+        return "energy/yearly-usage";
     }
 }
