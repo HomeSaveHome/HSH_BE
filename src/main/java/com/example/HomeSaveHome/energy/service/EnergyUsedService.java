@@ -129,6 +129,8 @@ public class EnergyUsedService {
             yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.ELECTRICITY, year, 0.0, 0L));
         }
 
+        yearlyEnergyUsedList.sort(Comparator.comparing(r -> r.getEnergyType() == EnergyType.GAS ? 0 : 1));
+
         return yearlyEnergyUsedList;
     }
 
@@ -194,7 +196,6 @@ public class EnergyUsedService {
             }
         }
 
-        // 변화율 계산
         return getEnergyTypeDoubleMap(gasUsageCurrent, electricityUsageCurrent, gasUsagePrevious, electricityUsagePrevious);
     }
 
@@ -289,7 +290,6 @@ public class EnergyUsedService {
             }
         }
 
-        // 변화율 계산
         return getEnergyTypeDoubleMap(gasAvgUsageCurrent, electricityAvgUsageCurrent, gasAvgUsagePrevious, electricityAvgUsagePrevious);
     }
 
@@ -301,7 +301,15 @@ public class EnergyUsedService {
         result.put(EnergyType.GAS, gasChangeRate);
         result.put(EnergyType.ELECTRICITY, electricityChangeRate);
 
-        return result;
+        Map<EnergyType, Double> sortedMap = new LinkedHashMap<>();
+        if (result.containsKey(EnergyType.GAS)) {
+            sortedMap.put(EnergyType.GAS, result.get(EnergyType.GAS));
+        }
+        if (result.containsKey(EnergyType.ELECTRICITY)) {
+            sortedMap.put(EnergyType.ELECTRICITY, result.get(EnergyType.ELECTRICITY));
+        }
+
+        return sortedMap;
     }
 
     public List<Integer> getUsedMonthsByYear(Long userId, int year, Long energyId) {
