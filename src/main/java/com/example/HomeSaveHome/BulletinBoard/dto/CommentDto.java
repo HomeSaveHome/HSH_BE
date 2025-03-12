@@ -17,6 +17,7 @@ public class CommentDto {
     private String body;
     private String author;
     private Long boardId;
+    private int likeCount;
 
     public static CommentDto createCommentDto(Comment comment, Long boardId) {
         return new CommentDto(
@@ -24,7 +25,8 @@ public class CommentDto {
                 comment.getArticle().getId(),
                 comment.getBody(),
                 comment.getAuthor(), // Ensure this is mapped correctly
-                boardId
+                boardId,
+                comment.getLikeCount()
         );
     }
 

@@ -44,6 +44,21 @@
     .btn-danger {
         background-color: #dc3545 !important; /* Bootstrap red */
     }
+
+    .like-button {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 5px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .like-button:hover {
+        background-color: #218838;
+    }
 </style>
 
 <div id="comments-list">
@@ -60,13 +75,66 @@
                         Delete
                     </button>
                 </form>
-
             </div>
         </div>
 
         <div class="comment-body">
             <p th:text="${comment.body}"></p>
         </div>
-    </div>
-</div>
 
+        <!-- ✅ Like Button for Comments -->
+        <form th:action="@{/api/likes/comments/{commentId}(commentId=${comment.id})}" method="post">
+            <input type="hidden" name="username" th:value="${loggedUsername}">
+            <button type="submit" class="like-button">
+                👍 Like (<span th:text="${comment.likeCount}"></span>)
+            </button>
+        </form>
+    </div>
+
+    <!-- ✅ Notification Popup -->
+    <div id="comment-notification" class="notification" style="display: none;">
+        <p id="comment-notification-text"></p>
+    </div>
+
+    <!-- ✅ JavaScript for Showing Popup -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let message = "[[${likeMessage}]]"; // ✅ Retrieve flash message
+
+            if (message && message !== "null") {
+                showCommentNotification(message);
+            }
+        });
+
+        function showCommentNotification(text) {
+            let notification = document.getElementById("comment-notification");
+            let notificationText = document.getElementById("comment-notification-text");
+
+            notificationText.innerText = text;
+            notification.style.display = "block";
+
+            // ✅ Hide after 3 seconds
+            setTimeout(() => {
+                notification.style.display = "none";
+            }, 3000);
+        }
+    </script>
+
+    <!-- ✅ Add CSS for Popup Notification -->
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+    </style>
+
+
+</div>

@@ -86,6 +86,22 @@
             width: fit-content;
             margin: 20px auto 0 auto;
         }
+
+        /* Like button styles */
+        .like-button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .like-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -104,6 +120,14 @@
             <span th:text="${article.formattedDate}"></span>
         </div>
     </div>
+
+    <!-- ✅ Like Button for Articles -->
+    <form th:action="@{/api/likes/articles/{articleId}(articleId=${article.id})}" method="post">
+        <input type="hidden" name="username" th:value="${loggedUsername}">
+        <button type="submit" class="like-button">
+            👍 Like (<span th:text="${article.likes.size()}"></span>)
+        </button>
+    </form>
 
     <!-- ✅ Show Edit/Delete Buttons Only If User is the Author -->
     <div th:if="${loggedUsername != null and loggedUsername == article.author}" style="text-align: right; margin-bottom: 20px;">
@@ -124,6 +148,53 @@
     <!-- ✅ "Go to Article List" Button -->
     <a th:href="@{/boards/{boardId}/articles(boardId=${boardId})}" class="btn btn-secondary">Go to Article List</a>
 </div>
+
+<!-- ✅ Notification Popup -->
+<div id="notification" class="notification" style="display: none;">
+    <p id="notification-text"></p>
+</div>
+
+<!-- ✅ JavaScript for Showing Popup -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let message = "[[${likeMessage}]]"; // ✅ Retrieve flash message
+
+        if (message && message !== "null") {
+            showNotification(message);
+        }
+    });
+
+    function showNotification(text) {
+        let notification = document.getElementById("notification");
+        let notificationText = document.getElementById("notification-text");
+
+        notificationText.innerText = text;
+        notification.style.display = "block";
+
+        // ✅ Hide after 3 seconds
+        setTimeout(() => {
+            notification.style.display = "none";
+        }, 3000);
+    }
+</script>
+
+<!-- ✅ Add CSS for Popup Notification -->
+<style>
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+</style>
+
+
 
 </body>
 </html>

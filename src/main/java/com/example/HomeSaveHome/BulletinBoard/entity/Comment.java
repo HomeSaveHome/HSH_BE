@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @ToString
@@ -32,6 +35,20 @@ public class Comment {
     @Column(nullable = false)
     private String author; // New field for author
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
+
+
+    public Comment(Long id, Article article, String body, Board board, String author) {
+        this.id = id;
+        this.article = article;
+        this.body = body;
+        this.board = board;
+        this.author = author;
+    }
+
+
     public static Comment createComment(CommentDto dto, Article article, String author) {
         // Exception handling
         if (dto.getId() != null) {
@@ -53,5 +70,9 @@ public class Comment {
         if (dto.getBody() != null) {
             this.body = dto.getBody();
         }
+    }
+
+    public int getLikeCount() {
+        return likes.size();
     }
 }

@@ -26,16 +26,7 @@ public class CommentService {
     private UserRepository userRepository;
 
     public List<CommentDto> comments(Long articleId) {
-//        // 1. Show all comments
-//        List<Comment> comments = commentRepository.findByArticleId(articleId);
-//        // 2. Entity --> DTO transformation
-//        List<CommentDto> dtos = new ArrayList<CommentDto>();
-//        for (int i=0;i<comments.size();i++) { // for each comment
-//            Comment c = comments.get(i); // get the comment
-//            CommentDto dto = CommentDto.createCommentDto(c); // create a DTO object (converting entity to DTO)
-//            dtos.add(dto); // add the DTO object to the list (dto)
-//        }
-        // 3. Return
+
         return commentRepository.findByArticleId(articleId)
                 .stream()
                 .map(comment -> CommentDto.createCommentDto(comment, comment.getBoard().getId())).collect(Collectors.toList());
