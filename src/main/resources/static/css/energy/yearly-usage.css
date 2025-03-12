@@ -1,0 +1,233 @@
+.yearly-usage-container {
+    margin: 50px 60px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    flex: 1;
+    background: var(--light-gray);
+    border-radius: 10px;
+}
+
+.yearly-usage-container h2 {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+.yearly-usage-content {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 연도 선택 드롭다운 */
+.yearly-usage-content form {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.yearly-usage-content form select,
+.yearly-usage-content form button {
+    height: 40px;
+    border: 1px solid var(--medium-gray);
+    border-radius: 10px;
+    font-size: 18px;
+    color: black;
+    background: white;
+    margin-left: 10px;
+}
+.yearly-usage-content form select {
+    width: 100px;
+    text-align: center;
+}
+.yearly-usage-content form button {
+    width: 80px;
+}
+.yearly-usage-content form button:hover {
+    cursor: pointer;
+}
+
+.yearly-usage-content-bottom {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+}
+
+/* 에너지 사용량 바 */
+.usage-bar-container {
+    width: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 2.5%;
+    height: 100%;
+}
+
+.bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bar {
+    width: 60px;
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    padding: 5px;
+    position: relative;
+    transition: height 0.5s ease-in-out;
+}
+
+.bar-value {
+    position: absolute;
+    top: -25px;
+    font-size: 14px;
+    color: black;
+}
+
+.bar-label {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* 에너지 사용 금액 */
+.left-container {
+    height: 100%;
+    background: var(--light-gray);
+    border-radius: 5px;
+    padding: 20px 15px;
+    width: 25%;
+}
+
+.price-card {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: 50%;
+    padding: 10px;
+}
+.price-card h3 {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--medium-gray);
+}
+.price-card p {
+    font-size: 28px;
+    font-weight: 500;
+}
+.diff-desc span {
+    font-size: 20px;
+    display: flex;
+    gap: 5px;
+    align-items: flex-start;
+}
+.diff-desc.no-data {
+    color: red;
+    font-size: 20px;
+    display: flex;
+    gap: 5px;
+    align-items: flex-start;
+}
+
+/* 평균 사용 금액 & 목표 달성률 */
+.right-container {
+    background: var(--light-gray);
+    border-radius: 5px;
+    width: 50%;
+    padding: 30px 25px;
+    display: flex;
+    gap: 15px;
+}
+
+.right-container h3 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* 평균 사용 금액 */
+.avg-container {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.avg-price-card {
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.avg-price-card h3 {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--medium-gray);
+}
+.avg-price-card p {
+    font-size: 25px;
+}
+.avg-diff span {
+    font-size: 20px;
+    display: flex;
+    gap: 5px;
+    align-items: flex-start;
+}
+.avg-diff.no-data {
+    color: red;
+    font-size: 20px;
+    display: flex;
+    gap: 5px;
+    align-items: flex-start;
+}
+
+/* 목표 달성률 */
+.goal-container {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.goal-result-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+canvas[id^='chart-'] {
+    max-width: 130px;  /* 기존보다 줄임 */
+    max-height: 130px;
+}
+
+.goal-price-container {
+    display: flex;
+    width: 100%;
+    align-content: center;
+}
+.goal-price-container div {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.goal-price p,
+.usage-price p {
+    font-size: 18px;
+    font-weight: 500;
+}
+.goal-price p:last-child,
+.usage-price p:last-child {
+    font-size: 13px;
+    color: var(--medium-gray);
+}

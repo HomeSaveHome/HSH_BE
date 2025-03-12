@@ -164,8 +164,10 @@ public class EnergyUsedController {
         // 변화율 데이터 가져오기
         Map<EnergyType, Double> avgChangeRates = energyUsedService.getYearlyAvgUsedChangeRate(userId, year, avgUsedMap);
 
+        model.addAttribute("selectedYear", year);
         model.addAttribute("currentYearData", currentYearData);
         model.addAttribute("yearlyChangeRates", yearlyChangeRates);
+        model.addAttribute("avgUsedMap", avgUsedMap);
         model.addAttribute("avgChangeRates", avgChangeRates);
 
         return "energy/yearly-usage";
