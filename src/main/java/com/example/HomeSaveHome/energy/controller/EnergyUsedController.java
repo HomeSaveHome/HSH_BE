@@ -136,6 +136,8 @@ public class EnergyUsedController {
 
         model.addAttribute("currentMonthData", currentMonthData);
         model.addAttribute("changeRates", changeRates);
+        model.addAttribute("selectedYear", year);
+        model.addAttribute("selectedMonth", month);
 
         return "energy/monthly-usage";
     }
