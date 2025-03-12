@@ -8,7 +8,6 @@ import com.example.HomeSaveHome.energy.entity.Energy;
 import com.example.HomeSaveHome.energy.entity.EnergyType;
 import com.example.HomeSaveHome.energy.entity.EnergyUsed;
 import com.example.HomeSaveHome.user.model.User;
-import com.example.HomeSaveHome.energy.repository.EnergyRepository;
 import com.example.HomeSaveHome.energy.repository.EnergyUsedRepository;
 import com.example.HomeSaveHome.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -164,7 +163,7 @@ public class EnergyUsedService {
     }
 
     // 변화율 계산
-    public Map<EnergyType, Optional<Double>> getUsageChangeRate(Long userId, List<MonthlyEnergyUsedResponse> currentMonthData) {
+    public Map<EnergyType, Double> getUsageChangeRate(Long userId, List<MonthlyEnergyUsedResponse> currentMonthData) {
         if (currentMonthData.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -193,25 +192,19 @@ public class EnergyUsedService {
         }
 
         // 변화율 계산
-        Optional<Double> gasChangeRate = calculateChangeRate(gasUsageCurrent, gasUsagePrevious);
-        Optional<Double> electricityChangeRate = calculateChangeRate(electricityUsageCurrent, electricityUsagePrevious);
-
-        Map<EnergyType, Optional<Double>> result = new HashMap<>();
-        result.put(EnergyType.GAS, gasChangeRate);
-        result.put(EnergyType.ELECTRICITY, electricityChangeRate);
-
-        return result;
+        return getEnergyTypeDoubleMap(gasUsageCurrent, electricityUsageCurrent, gasUsagePrevious, electricityUsagePrevious);
     }
 
-    private Optional<Double> calculateChangeRate(Long current, Long previous) {
-        if (current == null) return Optional.empty();
-        if (previous == null || previous == 0) return Optional.empty();
+    private double calculateChangeRate(Long current, Long previous) {
+        if (current == null || previous == null || previous == 0) {
+            return 0.0;
+        }
 
         double rate = ((double) (current - previous) / previous) * 100;
 
         BigDecimal roundedRate = new BigDecimal(rate).setScale(1, RoundingMode.HALF_UP);
 
-        return Optional.of(roundedRate.doubleValue());
+        return roundedRate.doubleValue();
     }
 
     // 특정 연도 월 평균 사용량 계산
@@ -230,7 +223,7 @@ public class EnergyUsedService {
     }
 
     // 특정 연도 사용 변화율 계산
-    public Map<EnergyType, Optional<Double>> getYearlyUsedChangeRate(Long userId, int year, List<YearlyEnergyUsedResponse> currentYearData) {
+    public Map<EnergyType, Double> getYearlyUsedChangeRate(Long userId, int year, List<YearlyEnergyUsedResponse> currentYearData) {
         List<YearlyEnergyUsedResponse> previousYearData = getYearlyEnergyUsed(userId, null, year - 1);
 
         Long gasUsageCurrent = null;
@@ -255,18 +248,11 @@ public class EnergyUsedService {
         }
 
         // 변화율 계산
-        Optional<Double> gasChangeRate = calculateChangeRate(gasUsageCurrent, gasUsagePrevious);
-        Optional<Double> electricityChangeRate = calculateChangeRate(electricityUsageCurrent, electricityUsagePrevious);
-
-        Map<EnergyType, Optional<Double>> result = new HashMap<>();
-        result.put(EnergyType.GAS, gasChangeRate);
-        result.put(EnergyType.ELECTRICITY, electricityChangeRate);
-
-        return result;
+        return getEnergyTypeDoubleMap(gasUsageCurrent, electricityUsageCurrent, gasUsagePrevious, electricityUsagePrevious);
     }
 
     // 월 평균 변화율 계산
-    public Map<EnergyType, Optional<Double>> getYearlyAvgUsedChangeRate(Long userId, int year, Map<EnergyType, Long> currentAvgData) {
+    public Map<EnergyType, Double> getYearlyAvgUsedChangeRate(Long userId, int year, Map<EnergyType, Long> currentAvgData) {
         Map<EnergyType, Long> previousAvgData = getEvgUsed(userId, null, year - 1);
 
         Long gasAvgUsageCurrent = null;
@@ -297,10 +283,14 @@ public class EnergyUsedService {
         }
 
         // 변화율 계산
-        Optional<Double> gasChangeRate = calculateChangeRate(gasAvgUsageCurrent, gasAvgUsagePrevious);
-        Optional<Double> electricityChangeRate = calculateChangeRate(electricityAvgUsageCurrent, electricityAvgUsagePrevious);
+        return getEnergyTypeDoubleMap(gasAvgUsageCurrent, electricityAvgUsageCurrent, gasAvgUsagePrevious, electricityAvgUsagePrevious);
+    }
 
-        Map<EnergyType, Optional<Double>> result = new HashMap<>();
+    private Map<EnergyType, Double> getEnergyTypeDoubleMap(Long gasAvgUsageCurrent, Long electricityAvgUsageCurrent, Long gasAvgUsagePrevious, Long electricityAvgUsagePrevious) {
+        double gasChangeRate = calculateChangeRate(gasAvgUsageCurrent, gasAvgUsagePrevious);
+        double electricityChangeRate = calculateChangeRate(electricityAvgUsageCurrent, electricityAvgUsagePrevious);
+
+        Map<EnergyType, Double> result = new HashMap<>();
         result.put(EnergyType.GAS, gasChangeRate);
         result.put(EnergyType.ELECTRICITY, electricityChangeRate);
 
