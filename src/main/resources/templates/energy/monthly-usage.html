@@ -52,7 +52,7 @@
                         <span th:case="'GAS'">가스</span>
                         <span th:case="'ELECTRICITY'">전기</span>
                     </h3>
-                    <p th:text="'₩ ' + (${data.price} != null ? ${data.price} : 0)"></p>
+                    <p th:text="'₩ ' + (${data.price} != null ? ${#numbers.formatInteger(data.price, 3, 'COMMA')} : 0)"></p>
                     <p class="diff-desc" th:if="${changeRates[data.energyType.name()] != null}">
                         <span th:with="rate=${changeRates[data.energyType]}">
                             <img th:src="@{/images/{arrow}.svg(arrow=${rate < 0 ? 'up-arrow' : 'down-arrow'})}" alt="">
@@ -148,11 +148,11 @@
                         </script>
                         <div class="goal-price-container">
                             <div class="goal-price">
-                                <p th:text="'₩' + (${data.price} != null ? data.price : 0)"></p>
+                                <p th:text="'₩' + (${data.price} != null ? ${#numbers.formatInteger(data.price, 3, 'COMMA')} : 0)"></p>
                                 <p>Goal</p>
                             </div>
                             <div class="usage-price">
-                                <p th:text="'₩' + (${data.price} != null ? data.price : 0)"></p>
+                                <p th:text="'₩' + (${data.price} != null ? ${#numbers.formatInteger(data.price, 3, 'COMMA')} : 0)"></p>
                                 <p>Usage</p>
                             </div>
                         </div>
