@@ -8,7 +8,6 @@ import com.example.HomeSaveHome.energy.entity.Energy;
 import com.example.HomeSaveHome.energy.entity.EnergyType;
 import com.example.HomeSaveHome.energy.entity.EnergyUsed;
 import com.example.HomeSaveHome.user.model.User;
-import com.example.HomeSaveHome.energy.repository.EnergyRepository;
 import com.example.HomeSaveHome.energy.repository.EnergyUsedRepository;
 import com.example.HomeSaveHome.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -23,12 +22,12 @@ import java.util.stream.Collectors;
 public class EnergyUsedService {
 
     private final EnergyUsedRepository energyUsedRepository;
-    private final EnergyRepository energyRepository;
+    private final EnergyService energyService;
     private final UserRepository userRepository;
 
-    public EnergyUsedService(EnergyUsedRepository energyUsedRepository, EnergyRepository energyRepository, UserRepository userRepository) {
+    public EnergyUsedService(EnergyUsedRepository energyUsedRepository, EnergyService energyService, UserRepository userRepository) {
         this.energyUsedRepository = energyUsedRepository;
-        this.energyRepository = energyRepository;
+        this.energyService = energyService;
         this.userRepository = userRepository;
     }
 
@@ -69,54 +68,70 @@ public class EnergyUsedService {
     }
 
     // 특정 월 에너지 사용량 조회
-    public List<MonthlyEnergyUsedResponse> getEnergyUsedByMonth(Long userId, Long energyId, int month, int year) {
+    public List<MonthlyEnergyUsedResponse> getEnergyUsedByMonth(Long userId, int month, int year) {
         if (month < 1 || month > 12) {
             throw new IllegalArgumentException("월은 1~12 사이의 값이어야 합니다.");
         }
 
         User user = getUserById(userId);
+        Energy gasEnergy = getEnergyById(1L);
+        Energy electricityEnergy = getEnergyById(2L);
 
-        List<EnergyUsed> energyUsedList;
-        if (energyId != null) {
-            Energy energy = getEnergyById(energyId);
-            energyUsedList = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, energy, month, year);
+        List<MonthlyEnergyUsedResponse> energyUsedList = new ArrayList<>();
+
+        // 가스 사용량 조회
+        List<EnergyUsed> gasEnergyUsed = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, gasEnergy, month, year);
+        if (gasEnergyUsed.isEmpty()) {
+            energyUsedList.add(new MonthlyEnergyUsedResponse(null, EnergyType.GAS, year, month, 0.0, null));
         } else {
-            energyUsedList = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, null, month, year);
+            energyUsedList.addAll(
+                    gasEnergyUsed.stream()
+                            .map(e -> new MonthlyEnergyUsedResponse(e.getId(), EnergyType.GAS, year, month, e.getAmount(), e.getPrice()))
+                            .toList()
+            );
         }
 
-        return energyUsedList.stream()
-                .map(e -> new MonthlyEnergyUsedResponse(
-                        e.getId(),
-                        e.getEnergy().getEnergyType(),
-                        e.getYear(),
-                        e.getMonth(),
-                        e.getAmount(),
-                        e.getPrice()
-                ))
-                .collect(Collectors.toList());
+        // 전기 사용량 조회
+        List<EnergyUsed> electricityEnergyUsed = energyUsedRepository.findByUserAndEnergyAndMonthAndYear(user, electricityEnergy, month, year);
+        if (electricityEnergyUsed.isEmpty()) {
+            energyUsedList.add(new MonthlyEnergyUsedResponse(null, EnergyType.ELECTRICITY, year, month, 0.0, null));
+        } else {
+            energyUsedList.addAll(
+                    electricityEnergyUsed.stream()
+                            .map(e -> new MonthlyEnergyUsedResponse(e.getId(), EnergyType.ELECTRICITY, year, month, e.getAmount(), e.getPrice()))
+                            .toList()
+            );
+        }
+
+        return energyUsedList;
     }
 
     // 연도별 총 사용량과 가격 계산
     public List<YearlyEnergyUsedResponse> getYearlyEnergyUsed(Long userId, Long energyId, int year) {
         User user = getUserById(userId);
 
-        List<Object[]> energyUsedList;
+        List<Object[]> energyUsedList = energyUsedRepository.findByUserAndYear(user, year);
+        List<YearlyEnergyUsedResponse> yearlyEnergyUsedList = new ArrayList<>();
 
-        if (energyId != null) {
-            Energy energy = getEnergyById(energyId);
-            energyUsedList = energyUsedRepository.getYearlyEnergyUsed(user, energy, year);
-        } else {
-            energyUsedList = energyUsedRepository.getYearlyEnergyUsed(user, null, year);
+        for (Object[] objects : energyUsedList) {
+            EnergyType energyType = (EnergyType) objects[0];
+            Integer responseYear = (Integer) objects[1];
+            Double totalAmount = (Double) objects[2];
+            Long totalPrice = (Long) objects[3];
+
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(energyType, responseYear, totalAmount, totalPrice));
         }
 
-        return energyUsedList.stream()
-                .map(e -> new YearlyEnergyUsedResponse(
-                        (EnergyType) e[0],  // energyType
-                        (Integer) e[1], // energyId
-                        (Double) e[2], // totalAmount
-                        (Long) e[3] // totalPrice
-                ))
-                .collect(Collectors.toList());
+        if (yearlyEnergyUsedList.stream().noneMatch(r -> r.getEnergyType() == EnergyType.GAS)) {
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.GAS, year, 0.0, 0L));
+        }
+        if (yearlyEnergyUsedList.stream().noneMatch(r -> r.getEnergyType() == EnergyType.ELECTRICITY)) {
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.ELECTRICITY, year, 0.0, 0L));
+        }
+
+        yearlyEnergyUsedList.sort(Comparator.comparing(r -> r.getEnergyType() == EnergyType.GAS ? 0 : 1));
+
+        return yearlyEnergyUsedList;
     }
 
     private User getUserById(Long userId) {
@@ -125,7 +140,7 @@ public class EnergyUsedService {
     }
 
     private Energy getEnergyById(Long energyId) {
-        return energyRepository.findById(energyId)
+        return energyService.getEnergyById(energyId)
                 .orElseThrow(() -> new RuntimeException("해당 에너지가 존재하지 않습니다."));
     }
 
@@ -139,7 +154,7 @@ public class EnergyUsedService {
             int monthValue = targetMonth.getMonthValue();
             int yearValue = targetMonth.getYear();
 
-            List<MonthlyEnergyUsedResponse> responseList = getEnergyUsedByMonth(userId, null, monthValue, yearValue);
+            List<MonthlyEnergyUsedResponse> responseList = getEnergyUsedByMonth(userId, monthValue, yearValue);
 
             Map<String, MonthlyEnergyUsedResponse> monthData = new HashMap<>();
             for (MonthlyEnergyUsedResponse response : responseList) {
@@ -153,12 +168,12 @@ public class EnergyUsedService {
     }
 
     // 변화율 계산
-    public Map<EnergyType, Optional<Double>> getUsageChangeRate(Long userId, List<MonthlyEnergyUsedResponse> currentMonthData) {
+    public Map<EnergyType, Double> getUsageChangeRate(Long userId, List<MonthlyEnergyUsedResponse> currentMonthData) {
         if (currentMonthData.isEmpty()) {
             return Collections.emptyMap();
         }
 
-        List<MonthlyEnergyUsedResponse> previousYearData = getEnergyUsedByMonth(userId, null, currentMonthData.get(0).getMonth(), currentMonthData.get(0).getYear() - 1);
+        List<MonthlyEnergyUsedResponse> previousYearData = getEnergyUsedByMonth(userId, currentMonthData.get(0).getMonth(), currentMonthData.get(0).getYear() - 1);
 
         Long gasUsageCurrent = null;
         Long electricityUsageCurrent = null;
@@ -181,45 +196,42 @@ public class EnergyUsedService {
             }
         }
 
-        // 변화율 계산
-        Optional<Double> gasChangeRate = calculateChangeRate(gasUsageCurrent, gasUsagePrevious);
-        Optional<Double> electricityChangeRate = calculateChangeRate(electricityUsageCurrent, electricityUsagePrevious);
-
-        Map<EnergyType, Optional<Double>> result = new HashMap<>();
-        result.put(EnergyType.GAS, gasChangeRate);
-        result.put(EnergyType.ELECTRICITY, electricityChangeRate);
-
-        return result;
+        return getEnergyTypeDoubleMap(gasUsageCurrent, electricityUsageCurrent, gasUsagePrevious, electricityUsagePrevious);
     }
 
-    private Optional<Double> calculateChangeRate(Long current, Long previous) {
-        if (current == null) return Optional.empty();
-        if (previous == null || previous == 0) return Optional.empty();
+    private double calculateChangeRate(Long current, Long previous) {
+        if (current == null || previous == null || previous == 0) {
+            return 0.0;
+        }
 
         double rate = ((double) (current - previous) / previous) * 100;
 
         BigDecimal roundedRate = new BigDecimal(rate).setScale(1, RoundingMode.HALF_UP);
 
-        return Optional.of(roundedRate.doubleValue());
+        return roundedRate.doubleValue();
     }
 
     // 특정 연도 월 평균 사용량 계산
     public Map<EnergyType, Long> getEvgUsed(Long userId, Long energyId, int year) {
         User user = getUserById(userId);
 
-        Map<EnergyType, Long> avgUsageMap;
+        List<Object[]> resultList;
         if (energyId != null) {
             Energy energy = getEnergyById(energyId);
-            avgUsageMap = energyUsedRepository.getYearlyAvgEnergyUsed(user, energy, year);
+            resultList = energyUsedRepository.getYearlyAvgEnergyUsed(user, energy, year);
         } else {
-            avgUsageMap = energyUsedRepository.getYearlyAvgEnergyUsed(user, null, year);
+            resultList = energyUsedRepository.getYearlyAvgEnergyUsed(user, null, year);
         }
 
-        return avgUsageMap;
+        return resultList.stream()
+                .collect(Collectors.toMap(
+                        row -> (EnergyType) row[0],
+                        row -> ((Number) row[1]).longValue()
+                ));
     }
 
     // 특정 연도 사용 변화율 계산
-    public Map<EnergyType, Optional<Double>> getYearlyUsedChangeRate(Long userId, int year, List<YearlyEnergyUsedResponse> currentYearData) {
+    public Map<EnergyType, Double> getYearlyUsedChangeRate(Long userId, int year, List<YearlyEnergyUsedResponse> currentYearData) {
         List<YearlyEnergyUsedResponse> previousYearData = getYearlyEnergyUsed(userId, null, year - 1);
 
         Long gasUsageCurrent = null;
@@ -244,18 +256,11 @@ public class EnergyUsedService {
         }
 
         // 변화율 계산
-        Optional<Double> gasChangeRate = calculateChangeRate(gasUsageCurrent, gasUsagePrevious);
-        Optional<Double> electricityChangeRate = calculateChangeRate(electricityUsageCurrent, electricityUsagePrevious);
-
-        Map<EnergyType, Optional<Double>> result = new HashMap<>();
-        result.put(EnergyType.GAS, gasChangeRate);
-        result.put(EnergyType.ELECTRICITY, electricityChangeRate);
-
-        return result;
+        return getEnergyTypeDoubleMap(gasUsageCurrent, electricityUsageCurrent, gasUsagePrevious, electricityUsagePrevious);
     }
 
     // 월 평균 변화율 계산
-    public Map<EnergyType, Optional<Double>> getYearlyAvgUsedChangeRate(Long userId, int year, Map<EnergyType, Long> currentAvgData) {
+    public Map<EnergyType, Double> getYearlyAvgUsedChangeRate(Long userId, int year, Map<EnergyType, Long> currentAvgData) {
         Map<EnergyType, Long> previousAvgData = getEvgUsed(userId, null, year - 1);
 
         Long gasAvgUsageCurrent = null;
@@ -285,14 +290,31 @@ public class EnergyUsedService {
             }
         }
 
-        // 변화율 계산
-        Optional<Double> gasChangeRate = calculateChangeRate(gasAvgUsageCurrent, gasAvgUsagePrevious);
-        Optional<Double> electricityChangeRate = calculateChangeRate(electricityAvgUsageCurrent, electricityAvgUsagePrevious);
+        return getEnergyTypeDoubleMap(gasAvgUsageCurrent, electricityAvgUsageCurrent, gasAvgUsagePrevious, electricityAvgUsagePrevious);
+    }
 
-        Map<EnergyType, Optional<Double>> result = new HashMap<>();
+    private Map<EnergyType, Double> getEnergyTypeDoubleMap(Long gasAvgUsageCurrent, Long electricityAvgUsageCurrent, Long gasAvgUsagePrevious, Long electricityAvgUsagePrevious) {
+        double gasChangeRate = calculateChangeRate(gasAvgUsageCurrent, gasAvgUsagePrevious);
+        double electricityChangeRate = calculateChangeRate(electricityAvgUsageCurrent, electricityAvgUsagePrevious);
+
+        Map<EnergyType, Double> result = new HashMap<>();
         result.put(EnergyType.GAS, gasChangeRate);
         result.put(EnergyType.ELECTRICITY, electricityChangeRate);
 
-        return result;
+        Map<EnergyType, Double> sortedMap = new LinkedHashMap<>();
+        if (result.containsKey(EnergyType.GAS)) {
+            sortedMap.put(EnergyType.GAS, result.get(EnergyType.GAS));
+        }
+        if (result.containsKey(EnergyType.ELECTRICITY)) {
+            sortedMap.put(EnergyType.ELECTRICITY, result.get(EnergyType.ELECTRICITY));
+        }
+
+        return sortedMap;
+    }
+
+    public List<Integer> getUsedMonthsByYear(Long userId, int year, Long energyId) {
+        User user = getUserById(userId);
+        Energy energy = getEnergyById(energyId);
+        return energyUsedRepository.findUsedMonthsByUserAndYear(user, year, energy);
     }
 }

@@ -7,7 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class MainController {
 
     @GetMapping("/")
-    public String mainPage() { //인자로 로그인되어있는지 모델에 넣어서
-        return "mainpage/main";
+    public String onBoarding() { //인자로 로그인되어있는지 모델에 넣어서
+        return "onboarding";
+    }
+
+    @GetMapping("/main")
+    public String mainpage() {
+        return "main";
     }
 }

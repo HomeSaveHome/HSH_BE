@@ -30,6 +30,10 @@ public class Comment {
     @Column
     private String body;
 
+    @ManyToOne
+    @JoinColumn(name = "board_id")
+    private Board board;
+
     public static Comment createComment(CommentDto dto, Article article) {
         // Exception handling
         // 1. If there's id in dto, IllegalArgumentException (there shouldn't be ID value before even creating a comment)
@@ -41,7 +45,7 @@ public class Comment {
             throw new IllegalArgumentException("Can't create a comment! Wrong Article ID.");
         }
         // Create entity and convert
-        return new Comment(dto.getId(), article, dto.getNickname(), dto.getBody());
+        return new Comment(dto.getId(), article, dto.getNickname(), dto.getBody(), article.getBoard());
     }
 
     public void patch(CommentDto dto) {
