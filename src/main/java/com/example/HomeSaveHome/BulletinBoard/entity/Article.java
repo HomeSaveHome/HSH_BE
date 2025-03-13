@@ -66,5 +66,8 @@ public class Article {
         this.board = board;
     }
 
+    public int getCommentCount() {
+        return (comments != null) ? comments.size() : 0;
+    }
 
 }
