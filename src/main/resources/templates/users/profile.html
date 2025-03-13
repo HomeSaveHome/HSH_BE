@@ -6,16 +6,27 @@
     <title>프로필</title>
     <link rel="stylesheet" href="/css/profilepage.css">
     <script>
-        function showAlert() {
-            var message = document.getElementById("successMessage");
-            if (message) {
-                alert(message.innerText);
-            }
+        function checkDuplicate(field, value) {
+            fetch(`/users/check-duplicate?field=${field}&value=${encodeURIComponent(value)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        alert(`${field === 'username' ? '이름' : '이메일'}이 이미 존재합니다.`);
+                        document.getElementById(field).value = ''; // 중복이면 입력 초기화
+                    }
+                })
+                .catch(error => console.error("중복 확인 중 오류 발생:", error));
         }
 
-        function confirmDelete() {
-            return confirm("정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.");
-        }
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("username").addEventListener("blur", function() {
+                checkDuplicate("username", this.value);
+            });
+
+            document.getElementById("email").addEventListener("blur", function() {
+                checkDuplicate("email", this.value);
+            });
+        });
     </script>
 </head>
 <body>

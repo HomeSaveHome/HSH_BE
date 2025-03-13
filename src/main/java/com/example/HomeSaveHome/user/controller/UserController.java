@@ -6,11 +6,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/users")
@@ -89,27 +93,20 @@ public class UserController {
         }
 
         User loggedInUser = userService.getLoggedInUser();
+        loggedInUser.setUsername(username);
+        loggedInUser.setEmail(email);
 
-        try {
-            loggedInUser.setUsername(username);
-            loggedInUser.setEmail(email);
-            User updatedUser = userService.updateUserProfile(loggedInUser);
+        boolean isUpdated = userService.updateUserProfile(loggedInUser);
 
-            model.addAttribute("user", updatedUser);
-            model.addAttribute("message", "프로필이 성공적으로 업데이트되었습니다.");
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());  // 오류 메시지 추가
-            return "users/profile";  // 에러 발생 시 기존 프로필 페이지로 돌아감
-        } catch (Exception e) {
-            model.addAttribute("error", "알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
-            return "users/profile";  // 기타 예외 발생 시에도 프로필 페이지 유지
+        if (!isUpdated) {
+            model.addAttribute("error", "이미 사용 중인 이름 또는 이메일입니다.");
+            return "users/profile"; // 중복이 발생하면 다시 프로필 페이지로 이동
         }
 
+        model.addAttribute("user", loggedInUser);
+        model.addAttribute("message", "프로필이 성공적으로 업데이트되었습니다.");
         return "users/profile";
     }
-
-
-
 
 
     // 사용자 삭제
@@ -174,5 +171,22 @@ public class UserController {
             model.addAttribute("error", "로그인된 사용자가 없습니다. 다시 로그인해주세요.");
             return "users/login";  // 로그인 페이지로 리디렉션
         }
+    }
+
+    @GetMapping("/check-duplicate")
+    public ResponseEntity<Map<String, Boolean>> checkDuplicate(
+            @RequestParam String field,
+            @RequestParam String value) {
+
+        boolean exists = false;
+        if ("username".equals(field)) {
+            exists = userService.existsByUsername(value);
+        } else if ("email".equals(field)) {
+            exists = userService.existsByEmail(value);
+        }
+
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
     }
 }
