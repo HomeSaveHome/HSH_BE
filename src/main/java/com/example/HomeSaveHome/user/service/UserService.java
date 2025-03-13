@@ -3,9 +3,11 @@ package com.example.HomeSaveHome.user.service;
 import com.example.HomeSaveHome.user.model.User;
 import com.example.HomeSaveHome.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -76,18 +78,39 @@ public class UserService {
     }
 
     // 프로필 수정 (비밀번호 암호화 제거, 평문 비밀번호 그대로 저장)
-    public User updateUserProfile(User user) {
-        User existingUser = userRepository.findByUsername(user.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found: " + user.getUsername()));
 
-        existingUser.setEmail(user.getEmail());
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        } // 평문 비밀번호 그대로 저장
-        existingUser.setPoint(user.getPoint());
-        existingUser.setLevel(user.getLevel());
-        return userRepository.save(existingUser);
+    public User updateUserProfile(User user) {
+        Optional<User> existingUser = userRepository.findById(user.getId());
+
+        if (existingUser.isPresent()) {
+            User updatedUser = existingUser.get();
+
+            // 변경된 값이 있는지 확인
+            boolean isUsernameChanged = !updatedUser.getUsername().equals(user.getUsername());
+            boolean isEmailChanged = !updatedUser.getEmail().equals(user.getEmail());
+
+            // 중복 검사
+            if (isUsernameChanged && userRepository.existsByUsername(user.getUsername())) {
+                throw new IllegalArgumentException("이미 사용 중인 사용자 이름입니다.");
+            }
+            if (isEmailChanged && userRepository.existsByEmail(user.getEmail())) {
+                throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            }
+
+            // 값 업데이트
+            updatedUser.setUsername(user.getUsername());
+            updatedUser.setEmail(user.getEmail());
+
+            try {
+                return userRepository.save(updatedUser);
+            } catch (DataIntegrityViolationException e) {
+                throw new IllegalArgumentException("데이터 저장 중 오류 발생: 중복된 값이 존재합니다.");
+            }
+        }
+        return null;
     }
+
+
 
     // 사용자 삭제
     public boolean deleteUser(Long userId) {
@@ -103,4 +126,23 @@ public class UserService {
     public User getUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
+
+    public User getLoggedInUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(principal);
+        if (principal instanceof UserDetails) {
+            String email = ((UserDetails) principal).getUsername();
+            //System.out.println("username: " + username);
+
+            User optionalUser = userRepository.findByEmail(email);  // 사용자 정보 가져오기
+            if(optionalUser == null) {
+                throw new RuntimeException("로그인된 사용자가 없습니다.");
+            }
+            // Optional<User>에서 값을 추출하여 반환
+            return optionalUser;  // 값이 없으면 예외 던짐
+        }
+        throw new RuntimeException("로그인된 사용자가 없습니다.");
+    }
+
+
 }

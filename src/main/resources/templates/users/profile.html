@@ -4,36 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>프로필</title>
+    <link rel="stylesheet" href="/css/profilepage.css">
+    <script>
+        function showAlert() {
+            var message = document.getElementById("successMessage");
+            if (message) {
+                alert(message.innerText);
+            }
+        }
+
+        function confirmDelete() {
+            return confirm("정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.");
+        }
+    </script>
 </head>
 <body>
-<h1>사용자 프로필</h1>
+<div class="profile-container">
+    <h1 class="logo">HOME <span>SAVE</span> HOME</h1>
 
-<div>
+    <!-- 오류 메시지 표시 -->
+    <div th:if="${error}" class="alert alert-danger">
+        <p th:text="${error}"></p>
+    </div>
+
+    <!-- 성공 메시지 표시 -->
+    <div th:if="${message}" class="alert alert-success">
+        <p id="successMessage" th:text="${message}"></p>
+    </div>
+
     <h3>사용자 정보</h3>
-    <p>아이디: <span th:text="${user.username}">[아이디]</span></p>
+    <p>이름: <span th:text="${user.username}">[이름]</span></p>
     <p>이메일: <span th:text="${user.email}">[이메일]</span></p>
-    <p>이름: <span th:text="${user.name}">[이름]</span></p>
-</div>
+    <p>포인트: <span th:text="${user.point}">[포인트]</span></p>
+    <p>레벨: <span th:text="${user.level}">[레벨]</span></p>
 
-<div>
     <h3>프로필 수정</h3>
-    <form action="/users/me" method="post">
-        <label for="username">아이디:</label>
-        <input type="text" id="username" name="username" value="[[${user.username}]]" required /><br/>
+    <form action="/users/me" method="post" onsubmit="showAlert()">
+        <label for="username">이름:</label>
+        <input type="text" id="username" name="username" placeholder="입력하세요" required /><br/>
 
         <label for="email">이메일:</label>
-        <input type="email" id="email" name="email" value="[[${user.email}]]" required /><br/>
-
-        <label for="name">이름:</label>
-        <input type="text" id="name" name="name" value="[[${user.name}]]" required /><br/>
+        <input type="email" id="email" name="email" placeholder="입력하세요" required /><br/>
 
         <button type="submit">수정하기</button>
     </form>
-</div>
 
-<div>
-    <a href="/users/me">프로필로 돌아가기</a>
-    <a href="/users/logout">로그아웃</a>
+
+    <div class="links">
+        <a href="/main">메인화면으로</a>
+        <a href="/users/logout">로그아웃</a>
+    </div>
 </div>
 </body>
 </html>

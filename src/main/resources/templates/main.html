@@ -13,18 +13,18 @@
     <section class="energy-last-month" th:each="data : ${lastMonthData}">
         <h2>저번 달 에너지 사용량</h2>
         <tbody class="energy-box">
-            <tr th:each="lastMonthData : ${lastMonthData}">
-                <td>
-                    <img th:src="@{'/images/' + ${lastMonthData.energyName} + '.svg'}"
-                         th:alt="${lastMonthData.energyName}"
-                    />
-                </td>
-                <td>
-                    <span th:if="${lastMonthData == 'gas'}" th:text="가스 사용량"></span>
-                    <span th:if="${lastMonthData == 'electric'}" th:text="전기 사용량"></span>
-                </td>
-                <td th:text="'₩ ' + ${lastMonthData.price}"></td>
-            </tr>
+        <tr th:each="lastMonthData : ${lastMonthData}">
+            <td>
+                <img th:src="@{'/images/' + ${lastMonthData.energyName} + '.svg'}"
+                     th:alt="${lastMonthData.energyName}"
+                />
+            </td>
+            <td>
+                <span th:if="${lastMonthData == 'gas'}" th:text="가스 사용량"></span>
+                <span th:if="${lastMonthData == 'electric'}" th:text="전기 사용량"></span>
+            </td>
+            <td th:text="'₩ ' + ${lastMonthData.price}"></td>
+        </tr>
         </tbody>
     </section>
     <section class="energy-analytics">

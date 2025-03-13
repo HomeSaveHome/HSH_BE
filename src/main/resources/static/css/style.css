@@ -9,14 +9,14 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 100vh; /* 화면을 가득 채움 */
 }
 
 header {
     width: 100%;
     max-width: 1200px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 20px 50px;
     font-size: 18px;
@@ -33,29 +33,13 @@ header {
     color: #FDD835;
 }
 
-nav a {
-    text-decoration: none;
-    color: #000;
-    margin-right: 15px;
-    font-weight: 600;
-}
-
-.signup-btn {
-    background-color: #000;
-    color: #FFF;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
 main {
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
+    height: 100%;
 }
 
 .content {
@@ -75,6 +59,7 @@ p {
 }
 
 .cta-btn {
+    display: inline-block;
     background-color: #FDD835;
     border: none;
     padding: 15px 25px;
@@ -84,6 +69,8 @@ p {
     margin-top: 30px;
     cursor: pointer;
     transition: 0.3s;
+    text-decoration: none;
+    color: black;
 }
 
 .cta-btn:hover {
