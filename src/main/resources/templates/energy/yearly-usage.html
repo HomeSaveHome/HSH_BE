@@ -30,7 +30,7 @@
             <div class="usage-bar-container">
                 <div class="bar-wrapper" th:each="data : ${currentYearData}">
                     <div class="bar"
-                         th:style="'height:' + (${data.totalAmount} > 0 ? ${data.totalAmount} / 100 : 0) + 'px; background-color:' + (${data.energyType.name() == 'GAS' ? '#104911' : '#F6D365'})">
+                         th:style="'height:' + (${data.totalAmount} > 0 ? ${data.totalAmount} / 1000 : 0) + 'px; background-color:' + (${data.energyType.name() == 'GAS' ? '#104911' : '#F6D365'})">
                         <span class="bar-value" th:text="${#numbers.formatInteger(data.totalAmount, 3, 'COMMA') + (data.energyType.name() == 'GAS' ? 'm³' : 'KWh')}"></span>
                     </div>
                     <div class="bar-label" th:text="${data.energyType}"></div>
@@ -70,7 +70,7 @@
                             <span th:case="'ELECTRICITY'">전기</span>
                         </h3>
                         <p th:text="'₩ ' + (${avgUsedMap[entry.key]} != null ? ${#numbers.formatInteger(avgUsedMap[entry.key], 3, 'COMMA')} : 0)"></p>
-                        <p class="avg-diff" th:if="${yearlyChangeRates[entry.key] != null}">
+                        <p class="avg-diff" th:if="${previousYearData[entry.key].totalPrice != null}">
                             <span th:with="rate=${yearlyChangeRates[entry.key]}">
                                 <img th:src="@{/images/{arrow}.svg(arrow=${rate < 0 ? 'up-arrow' : 'down-arrow'})}" alt="">
                                 <span th:text="'전년도 대비 ' + ${rate < 0 ? ('+' + (-rate)) : ('-' + rate)} + '%'"
@@ -79,7 +79,7 @@
                             </span>
                         </p>
                         <!-- 전년도 데이터가 없는 경우 -->
-                        <p class="avg-diff no-data" th:if="${yearlyChangeRates[entry.key] == null}">
+                        <p class="avg-diff no-data" th:if="${previousYearData[entry.key].totalPrice == null}">
                             <img th:src="@{/images/no.svg}" alt="데이터 없음">
                             전년도 사용량 없음
                         </p>
