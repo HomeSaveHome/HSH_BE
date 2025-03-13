@@ -16,6 +16,7 @@
         padding-left: 10px;
         font-size: 16px;
         color: #333;
+        text-align: left;
     }
 
     /* Additional styling for modal */
@@ -37,13 +38,6 @@
         border: none !important;
     }
 
-    .btn-primary {
-        background-color: #104911 !important; /* Bootstrap blue */
-    }
-
-    .btn-danger {
-        background-color: #dc3545 !important; /* Bootstrap red */
-    }
 
     .like-button {
         background-color: #28a745;
@@ -59,22 +53,53 @@
     .like-button:hover {
         background-color: #218838;
     }
+
+    /* Add some spacing */
+    .btn-primary, .btn-danger {
+        padding: 8px 16px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+        font-size: 14px;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #104911;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+    }
 </style>
 
 <div id="comments-list">
     <div th:each="comment : ${commentDtos}" class="comment-card">
         <div class="comment-header">
             <strong th:text="${comment.author}"></strong>
-            <div th:if="${loggedUsername == comment.author}">
-                <a th:href="@{/comments/{commentId}/edit(commentId=${comment.id})}"
-                   class="btn btn-primary btn-sm text-white" style="padding: 8px 16px; border-radius: 5px;">
-                    Edit
-                </a>
-                <form th:action="@{/comments/{commentId}/delete(commentId=${comment.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger btn-sm text-white" style="padding: 8px 16px; border-radius: 5px;">
-                        Delete
+            <!-- ✅ Like Button for Comments -->
+
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                <!-- Like Button -->
+                <form th:action="@{/api/likes/comments/{commentId}(commentId=${comment.id})}" method="post">
+                    <input type="hidden" name="username" th:value="${loggedUsername}">
+                    <button type="submit" class="like-button">
+                        👍 Like (<span th:text="${comment.likeCount}"></span>)
                     </button>
                 </form>
+
+                <!-- Edit/Delete Buttons -->
+                <div th:if="${loggedUsername == comment.author}" style="display: flex; gap: 5px;">
+                    <a th:href="@{/comments/{commentId}/edit(commentId=${comment.id})}"
+                       class="btn btn-primary btn-sm text-white">
+                        Edit
+                    </a>
+                    <a href="javascript:void(0);"
+                       th:attr="data-url=@{/api/comments/{commentId}(commentId=${comment.id})}"
+                       class="btn btn-danger btn-sm text-white delete-comment">
+                        Delete
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -82,13 +107,7 @@
             <p th:text="${comment.body}"></p>
         </div>
 
-        <!-- ✅ Like Button for Comments -->
-        <form th:action="@{/api/likes/comments/{commentId}(commentId=${comment.id})}" method="post">
-            <input type="hidden" name="username" th:value="${loggedUsername}">
-            <button type="submit" class="like-button">
-                👍 Like (<span th:text="${comment.likeCount}"></span>)
-            </button>
-        </form>
+
     </div>
 
     <!-- ✅ Notification Popup -->
@@ -136,5 +155,26 @@
         }
     </style>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".delete-comment").forEach(button => {
+                button.addEventListener("click", function () {
+                    let url = this.getAttribute("data-url");
 
+                    if (confirm("Are you sure you want to delete this comment?")) {
+                        fetch(url, { method: "DELETE" }) // ✅ Correctly using DELETE method
+                            .then(response => {
+                                if (response.ok) {
+                                    alert("Comment deleted successfully!");
+                                    window.location.reload(); // ✅ Reload page after deletion
+                                } else {
+                                    alert("Failed to delete comment!");
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                    }
+                });
+            });
+        });
+    </script>
 </div>

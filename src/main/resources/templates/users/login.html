@@ -8,12 +8,9 @@
 </head>
 <body>
 
-<button class="open-login-btn" onclick="showLogin()">웹 열기</button>
-
-<div id="login-container" style="display: none;">
+<div id="login-container" style="display: flex;">
     <div class="login-box">
         <h1 class="logo">HOME <span>SAVE</span> HOME</h1>
-        <button class="kakao-btn">카카오톡으로 1초만에 시작하기</button>
         <p class="or-text">또는</p>
 
         <form action="/users/login" method="post">
@@ -23,20 +20,14 @@
         </form>
 
         <div class="links">
-            <a href="#">계정 찾기</a> |
-            <a href="#">비밀번호 찾기</a> |
-            <a href="/users/signup">회원가입</a>
+            <a href="/users/signup">회원가입 1초만에</a>
         </div>
     </div>
 </div>
 
 <script>
-    function showLogin() {
-        document.getElementById("login-container").style.display = "flex";
-    }
-
     window.onload = function() {
-        document.getElementById("login-container").style.display = "none";
+        document.getElementById("login-container").style.display = "flex";
     };
 </script>
 
