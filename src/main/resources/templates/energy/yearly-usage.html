@@ -45,7 +45,7 @@
                         <span th:case="'ELECTRICITY'">전기</span>
                     </h3>
                     <p th:text="'₩ ' + (${data.totalPrice} != null ? ${#numbers.formatInteger(data.totalPrice, 3, 'COMMA')} : 0)"></p>
-                    <p class="diff-desc" th:if="${yearlyChangeRates[data.energyType.name()] != null}">
+                    <p class="diff-desc" th:if="${previousYearData[data.energyType].totalPrice != null}">
                         <span th:with="rate=${yearlyChangeRates[data.energyType]}">
                             <img th:src="@{/images/{arrow}.svg(arrow=${rate < 0 ? 'up-arrow' : 'down-arrow'})}" alt="">
                             <span th:text="'전년도 대비 ' + ${rate < 0 ? ('+' + (-rate)) : ('-' + rate)} + '%'"
@@ -54,7 +54,7 @@
                         </span>
                     </p>
                     <!-- 전년도 데이터가 없는 경우 -->
-                    <p class="diff-desc no-data" th:if="${yearlyChangeRates[data.energyType.name()] == null}">
+                    <p class="diff-desc no-data" th:if="${previousYearData[data.energyType].totalPrice == null}">
                         <img th:src="@{/images/no.svg}" alt="데이터 없음">
                         전년도 사용량 없음
                     </p>
@@ -164,11 +164,11 @@
                         </script>
                         <div class="goal-price-container">
                             <div class="goal-price">
-                                <p th:text="'₩' + ${#numbers.formatInteger(data.totalPrice, 3, 'COMMA')}"></p>
+                                <p th:text="'₩' + ${#numbers.formatInteger(data.totalPrice ?: 0, 3, 'COMMA')}"></p>
                                 <p>Goal</p>
                             </div>
                             <div class="usage-price">
-                                <p th:text="'₩' + ${#numbers.formatInteger(data.totalPrice, 3, 'COMMA')}"></p>
+                                <p th:text="'₩' + ${#numbers.formatInteger(data.totalPrice ?: 0, 3, 'COMMA')}"></p>
                                 <p>Usage</p>
                             </div>
                         </div>

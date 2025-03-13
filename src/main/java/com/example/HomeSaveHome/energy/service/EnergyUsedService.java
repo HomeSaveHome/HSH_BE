@@ -123,10 +123,10 @@ public class EnergyUsedService {
         }
 
         if (yearlyEnergyUsedList.stream().noneMatch(r -> r.getEnergyType() == EnergyType.GAS)) {
-            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.GAS, year, 0.0, 0L));
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.GAS, year, 0.0, null));
         }
         if (yearlyEnergyUsedList.stream().noneMatch(r -> r.getEnergyType() == EnergyType.ELECTRICITY)) {
-            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.ELECTRICITY, year, 0.0, 0L));
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.ELECTRICITY, year, 0.0, null));
         }
 
         yearlyEnergyUsedList.sort(Comparator.comparing(r -> r.getEnergyType() == EnergyType.GAS ? 0 : 1));
