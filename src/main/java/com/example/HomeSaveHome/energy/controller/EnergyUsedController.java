@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/energyUsed")
@@ -130,11 +131,17 @@ public class EnergyUsedController {
 
         // 검색한 월 에너지 사용량 데이터 가져오기
         List<MonthlyEnergyUsedResponse> currentMonthData = energyUsedService.getEnergyUsedByMonth(userId, month, year);
+        // 전년도 사용량 데이터 가져오기
+        List<MonthlyEnergyUsedResponse> previousMonthDataList = energyUsedService.getEnergyUsedByMonth(userId, month, year - 1);
+
+        Map<EnergyType, MonthlyEnergyUsedResponse> previousMonthData = previousMonthDataList.stream()
+                .collect(Collectors.toMap(MonthlyEnergyUsedResponse::getEnergyType, data -> data, (oldValue, newValue) -> oldValue));
 
         // 변화율 데이터 가져오기
         Map<EnergyType, Double> changeRates = energyUsedService.getUsageChangeRate(userId, currentMonthData);
 
         model.addAttribute("currentMonthData", currentMonthData);
+        model.addAttribute("previousMonthData", previousMonthData);
         model.addAttribute("changeRates", changeRates);
         model.addAttribute("selectedYear", year);
         model.addAttribute("selectedMonth", month);
@@ -156,6 +163,11 @@ public class EnergyUsedController {
 
         // 검색한 년도 에너지 데이터 가져오기
         List<YearlyEnergyUsedResponse> currentYearData = energyUsedService.getYearlyEnergyUsed(userId, null, year);
+        // 전년도 에너지 데이터
+        List<YearlyEnergyUsedResponse> previousYearDataList = energyUsedService.getYearlyEnergyUsed(userId, null, year - 1);
+        Map<EnergyType, YearlyEnergyUsedResponse> previousYearData = previousYearDataList.stream()
+                .collect(Collectors.toMap(YearlyEnergyUsedResponse::getEnergyType, data -> data, (oldValue, newValue) -> oldValue));
+
         // 총 사용량 변화율 데이터 가져오기
         Map<EnergyType, Double> yearlyChangeRates = energyUsedService.getYearlyUsedChangeRate(userId, year, currentYearData);
 
@@ -166,6 +178,7 @@ public class EnergyUsedController {
 
         model.addAttribute("selectedYear", year);
         model.addAttribute("currentYearData", currentYearData);
+        model.addAttribute("previousYearData", previousYearData);
         model.addAttribute("yearlyChangeRates", yearlyChangeRates);
         model.addAttribute("avgUsedMap", avgUsedMap);
         model.addAttribute("avgChangeRates", avgChangeRates);

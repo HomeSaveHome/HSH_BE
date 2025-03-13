@@ -53,7 +53,7 @@
                         <span th:case="'ELECTRICITY'">전기</span>
                     </h3>
                     <p th:text="'₩ ' + (${data.price} != null ? ${#numbers.formatInteger(data.price, 3, 'COMMA')} : 0)"></p>
-                    <p class="diff-desc" th:if="${changeRates[data.energyType.name()] != null}">
+                    <p class="diff-desc" th:if="${previousMonthData[data.energyType].price != null}">
                         <span th:with="rate=${changeRates[data.energyType]}">
                             <img th:src="@{/images/{arrow}.svg(arrow=${rate < 0 ? 'up-arrow' : 'down-arrow'})}" alt="">
                             <span th:text="'전년도 대비 ' + ${rate < 0 ? ('+' + (-rate)) : ('-' + rate)} + '%'"
@@ -62,7 +62,7 @@
                         </span>
                     </p>
                     <!-- 전년도 데이터가 없는 경우 -->
-                    <p class="diff-desc no-data" th:if="${changeRates[data.energyType.name()] == null}">
+                    <p class="diff-desc no-data" th:if="${previousMonthData[data.energyType].price == null}">
                         <img th:src="@{/images/no.svg}" alt="데이터 없음">
                         전년도 사용량 없음
                     </p>

@@ -123,10 +123,10 @@ public class EnergyUsedService {
         }
 
         if (yearlyEnergyUsedList.stream().noneMatch(r -> r.getEnergyType() == EnergyType.GAS)) {
-            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.GAS, year, 0.0, 0L));
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.GAS, year, 0.0, null));
         }
         if (yearlyEnergyUsedList.stream().noneMatch(r -> r.getEnergyType() == EnergyType.ELECTRICITY)) {
-            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.ELECTRICITY, year, 0.0, 0L));
+            yearlyEnergyUsedList.add(new YearlyEnergyUsedResponse(EnergyType.ELECTRICITY, year, 0.0, null));
         }
 
         yearlyEnergyUsedList.sort(Comparator.comparing(r -> r.getEnergyType() == EnergyType.GAS ? 0 : 1));
@@ -175,26 +175,27 @@ public class EnergyUsedService {
 
         List<MonthlyEnergyUsedResponse> previousYearData = getEnergyUsedByMonth(userId, currentMonthData.get(0).getMonth(), currentMonthData.get(0).getYear() - 1);
 
-        Long gasUsageCurrent = null;
-        Long electricityUsageCurrent = null;
+        for (MonthlyEnergyUsedResponse data : previousYearData) {
+            System.out.println("Previous Data - Type: " + data.getEnergyType() + ", Price: " + data.getPrice());
+        }
+
+        Long gasUsageCurrent = currentMonthData.get(0).getPrice();
+        Long electricityUsageCurrent = currentMonthData.get(1).getPrice();
         Long gasUsagePrevious = null;
         Long electricityUsagePrevious = null;
 
-        for (MonthlyEnergyUsedResponse data : currentMonthData) {
-            if ("GAS".equalsIgnoreCase(data.getEnergyType().name())) {
-                gasUsageCurrent = data.getPrice();
-            } else if ("ELECTRICITY".equalsIgnoreCase(data.getEnergyType().name())) {
-                electricityUsageCurrent = data.getPrice();
-            }
-        }
-
         for (MonthlyEnergyUsedResponse data : previousYearData) {
-            if ("GAS".equalsIgnoreCase(data.getEnergyType().name())) {
+            if (EnergyType.GAS.equals(data.getEnergyType())) {
                 gasUsagePrevious = data.getPrice();
-            } else if ("ELECTRICITY".equalsIgnoreCase(data.getEnergyType().name())) {
+            } else if (EnergyType.ELECTRICITY.equals(data.getEnergyType())) {
                 electricityUsagePrevious = data.getPrice();
             }
         }
+
+        System.out.println("gasUsageCurrent: " + gasUsageCurrent);
+        System.out.println("eleUsageCurrent: " + electricityUsageCurrent);
+        System.out.println("gasUsagePrevious: " + gasUsagePrevious);
+        System.out.println("eleUsagePrevious: " + electricityUsagePrevious);
 
         return getEnergyTypeDoubleMap(gasUsageCurrent, electricityUsageCurrent, gasUsagePrevious, electricityUsagePrevious);
     }
@@ -307,6 +308,10 @@ public class EnergyUsedService {
         }
         if (result.containsKey(EnergyType.ELECTRICITY)) {
             sortedMap.put(EnergyType.ELECTRICITY, result.get(EnergyType.ELECTRICITY));
+        }
+
+        for (Map.Entry<EnergyType, Double> data : sortedMap.entrySet()) {
+            System.out.println(data.getKey() + " " + data.getValue());
         }
 
         return sortedMap;
