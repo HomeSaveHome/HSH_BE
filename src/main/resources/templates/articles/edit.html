@@ -3,36 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>게시글 수정</title>
-    <link rel="stylesheet" th:href="@{/css/global.css}">
-    <link rel="stylesheet" th:href="@{/css/header.css}">
-    <link rel="stylesheet" th:href="@{/css/articles/edit.css}">
+    <title>Edit Article</title>
+    <link rel="stylesheet" th:href="@{/css/onboarding.css}">
+    <style>
+        .content-container {
+            margin-top: 100px;
+            width: 90%;
+            max-width: 900px;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-left: auto;
+            margin-right: auto;
+        }
 
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #104911;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #0b3c0d;
+        }
+
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #104911;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-<div th:replace="header :: header"></div>
-
+<!-- ✅ Include the header -->
+<div class="header-container">
+    <div th:replace="header :: header"></div>
+</div>
 
 <div class="content-container">
-    <h2>게시글 수정</h2>
+    <h2>Edit Article</h2>
 
     <form th:action="@{/boards/{boardId}/articles/update(boardId=${boardId})}" method="post">
         <input type="hidden" name="id" th:value="${article.id}">
         <input type="hidden" name="author" th:value="${article.author}"> <!-- ✅ Preserve the author -->
 
         <div class="form-group">
-            <label class="form-label">제목</label>
+            <label class="form-label">Title</label>
             <input type="text" class="form-control" name="title" th:value="${article.title}" required>
         </div>
 
         <div class="form-group">
-            <label class="form-label">내용</label>
+            <label class="form-label">Content</label>
             <textarea class="form-control" rows="10" name="content" th:text="${article.content}" required></textarea>
         </div>
 
-        <button type="submit" class="submit-btn">게시글 수정</button>
-        <a th:href="@{/boards/{boardId}/articles/{id}(boardId=${boardId}, id=${article.id})}" class="back-btn">뒤로 가기</a>
+        <button type="submit" class="submit-btn">Update Article</button>
+        <a th:href="@{/boards/{boardId}/articles/{id}(boardId=${boardId}, id=${article.id})}" class="back-btn">Back</a>
     </form>
 </div>
 
