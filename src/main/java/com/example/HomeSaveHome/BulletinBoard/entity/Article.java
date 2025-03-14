@@ -11,10 +11,9 @@ import java.util.List;
 
 
 @NoArgsConstructor
-@ToString
-
 @Entity
 @Getter
+@ToString(exclude = {"comments", "likes"})
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

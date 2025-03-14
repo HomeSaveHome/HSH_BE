@@ -13,9 +13,9 @@ import java.util.List;
 
 @Entity
 @Getter
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "article")
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
