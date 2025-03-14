@@ -1,20 +1,5 @@
-body {
-    font-family: 'Noto Sans KR', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #FFFFFF;
-    text-align: center;
-    color: #000;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* 화면을 가득 채움 */
-}
-
 header {
     width: 100%;
-    max-width: 1200px;
     display: flex;
     justify-content: center;
     align-items: center;

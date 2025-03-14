@@ -50,7 +50,7 @@
             }).then(response => {
                 if (!response.ok) {
                     return response.json().then(data => {
-                        alert("Failed to create comment: " + (data.message || "Unknown error"));
+                        alert("Failed to create comment! Please check the input.");
                     });
                 }
                 alert("Comment created successfully!");
