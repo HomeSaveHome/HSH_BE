@@ -1,0 +1,122 @@
+.board-container {
+    margin: 50px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+    height: 100%;
+}
+.board-content {
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+}
+.board-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #104911;
+}
+
+.board-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+/* 게시글 작성 버튼 */
+.new-post-btn {
+    background-color: #FDD835;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    color: black;
+    text-decoration-line: none;
+}
+.new-post-btn:hover {
+    background-color: #E6C300;
+}
+
+/* 검색 버튼 */
+.search-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px 0;
+}
+.search-bar input {
+    padding: 8px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.search-bar button {
+    padding: 8px 12px;
+    margin-left: 5px;
+    background-color: #104911;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.search-bar button:hover {
+    background-color: #0b3c0d;
+}
+
+/* 게시판 내용 */
+.table-container {
+    flex: 1;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+tbody {
+    height: 100%;
+}
+tbody tr {
+    height: 60px;
+}
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background-color: #104911;
+    color: white;
+}
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+table a {
+    color: black;
+    text-decoration-line: none;
+}
+table a:hover {
+    text-decoration-line: underline;
+}
+
+.pagination-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.pagination-btn {
+    background-color: #104911;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+    margin: 0 10px;
+}
+
+.pagination-btn:hover {
+    background-color: #0b3c0d;
+}
