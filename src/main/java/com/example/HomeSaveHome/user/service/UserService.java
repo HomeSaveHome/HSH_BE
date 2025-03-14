@@ -3,8 +3,14 @@ package com.example.HomeSaveHome.user.service;
 import com.example.HomeSaveHome.user.model.User;
 import com.example.HomeSaveHome.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -13,64 +19,127 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // 회원가입 처리 메서드
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // 회원가입 처리 메서드 (비밀번호 암호화 제거, 평문 그대로 저장)
     public boolean registerUser(User user) {
-        // 사용자명 중복 체크
-        User existingUser = userRepository.findByUsername(user.getUsername());
-        if (existingUser != null) {
-            return false;  // 이미 존재하는 사용자 이름
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            return false;
+        }
+        if (userRepository.findByEmail(user.getEmail()) != null) {
+            return false;
         }
 
-        // 이메일 중복 체크
-        existingUser = userRepository.findByEmail(user.getEmail());
-        if (existingUser != null) {
-            return false;  // 이미 존재하는 이메일
-        }
+        // 비밀번호 암호화
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        userRepository.save(user);  // 새로운 사용자 저장
+        // 로그 찍기 (이게 중요)
+        System.out.println("가입 시도하는 유저 정보: " + user);
+
+        userRepository.save(user);
         return true;
     }
 
-    // 로그인 인증 처리 메서드
+    // 기존 로그인 인증 (평문 비밀번호 비교)
     public boolean authenticateUser(String email, String password) {
         User user = userRepository.findByEmail(email);
-        if (user != null && user.getPassword().equals(password)) {
-            return true;  // 인증 성공
+        if (user != null) {
+            System.out.println("DB에 저장된 비밀번호: " + user.getPassword());
+            System.out.println("입력된 비밀번호: " + password);
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                return true;  // 인증 성공
+            }
         }
         return false;  // 인증 실패
     }
 
-    // 현재 사용자 반환 (예시로 항상 첫 번째 사용자 반환)
-    public User getCurrentUser() {
-        return userRepository.findByUsername("testuser");  // 예시로 'testuser' 사용
+    // 새로운 로그인 처리 (SecurityContext 저장까지 포함, 평문 비밀번호 비교)
+    public boolean authenticateAndSetContext(String email, String password) {
+        User user = userRepository.findByEmail(email);
+        if (user != null && user.getPassword().equals(password)) {
+            List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            System.out.println("로그인 성공, SecurityContext 설정됨: " + SecurityContextHolder.getContext().getAuthentication());
+            return true;
+        }
+        return false;
     }
 
-    // 프로필 수정
-    public User updateUserProfile(User user) {
-        User existingUser = userRepository.findByUsername(user.getUsername());
-        if (existingUser != null) {
-            existingUser.setEmail(user.getEmail());
-            existingUser.setPassword(user.getPassword());
-            existingUser.setPoint(user.getPoint());
-            existingUser.setLevel(user.getLevel());
-            return userRepository.save(existingUser);  // 업데이트된 사용자 저장
+
+    // 현재 로그인된 사용자 반환 (SecurityContext 활용)
+    public User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+    }
+
+    // 프로필 수정 (비밀번호 암호화 제거, 평문 비밀번호 그대로 저장)
+
+    public boolean updateUserProfile(User user) {
+        Optional<User> existingUser = userRepository.findById(user.getId());
+
+        if (existingUser.isPresent()) {
+            User updatedUser = existingUser.get();
+
+            boolean isUsernameChanged = !updatedUser.getUsername().equals(user.getUsername());
+            boolean isEmailChanged = !updatedUser.getEmail().equals(user.getEmail());
+
+            if (isUsernameChanged && userRepository.existsByUsername(user.getUsername())) {
+                return false; // 중복된 username 존재
+            }
+            if (isEmailChanged && userRepository.existsByEmail(user.getEmail())) {
+                return false; // 중복된 email 존재
+            }
+
+            updatedUser.setUsername(user.getUsername());
+            updatedUser.setEmail(user.getEmail());
+
+            userRepository.save(updatedUser);
+            return true;
         }
-        return null;  // 사용자 존재하지 않으면 null 반환
+        return false;
     }
 
     // 사용자 삭제
     public boolean deleteUser(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
-            userRepository.delete(user.get());  // ID로 사용자 삭제
+            userRepository.delete(user.get());
             return true;
         }
-        return false;  // 사용자가 존재하지 않으면 삭제 실패
+        return false;
     }
 
     // ID로 사용자 조회
     public User getUserById(Long userId) {
-        // Optional을 사용하여 사용자 존재 여부 확인
-        return userRepository.findById(userId).orElse(null);  // ID로 사용자 조회
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    public User getLoggedInUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(principal);
+        if (principal instanceof UserDetails) {
+            String email = ((UserDetails) principal).getUsername();
+            //System.out.println("username: " + username);
+
+            User optionalUser = userRepository.findByEmail(email);  // 사용자 정보 가져오기
+            if(optionalUser == null) {
+                throw new RuntimeException("로그인된 사용자가 없습니다.");
+            }
+            // Optional<User>에서 값을 추출하여 반환
+            return optionalUser;  // 값이 없으면 예외 던짐
+        }
+        throw new RuntimeException("로그인된 사용자가 없습니다.");
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 }
