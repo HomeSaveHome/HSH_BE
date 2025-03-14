@@ -25,7 +25,7 @@ public class CommentDto {
                 comment.getArticle().getId(),
                 comment.getBody(),
                 comment.getAuthor(), // Ensure this is mapped correctly
-                boardId,
+                comment.getArticle().getBoard().getId(),
                 comment.getLikeCount()
         );
     }
