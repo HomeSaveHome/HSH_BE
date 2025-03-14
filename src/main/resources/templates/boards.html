@@ -4,29 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Boards</title>
-    <link rel="stylesheet" th:href="@{/css/onboarding.css}">
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
     <style>
-        /* ✅ Pin the header to the top */
-        .header-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: white;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            padding: 15px 0;
-        }
-
         /* ✅ Make sure content does not overlap with fixed header */
         .content-container {
-            margin-top: 80px; /* Adjust to prevent overlap */
+            margin: 50px 60px;
+            height: 100%;
         }
 
         .board-container {
-            width: 90%;
-            max-width: 1100px;
-            margin: 20px auto 50px auto;
+            height: 100%;
             padding: 30px;
             background: white;
             border-radius: 8px;
@@ -84,12 +72,7 @@
     </style>
 </head>
 <body>
-
-<!-- ✅ Pin the header to the top -->
-<div class="header-container">
-    <div th:replace="header :: header"></div>
-</div>
-
+<div th:replace="~{header :: header}"></div>
 <div class="content-container">
     <div class="board-container">
         <div class="board-header">
