@@ -73,3 +73,32 @@ button {
     color: #666;
     margin: 0 10px;
 }
+
+/* 사용자 정보 부분 스타일 */
+.profile-container p {
+    font-family: 'Arial', sans-serif; /* 원하는 폰트 추가 */
+    font-size: 16px; /* 폰트 크기 설정 */
+    color: #333; /* 텍스트 색상 */
+    text-align: left; /* 왼쪽 정렬 */
+    margin-bottom: 10px; /* 간격 조정 */
+}
+
+/* 폼 부분의 입력 필드 스타일 */
+.profile-container label {
+    font-family: 'Arial', sans-serif; /* 원하는 폰트 추가 */
+    font-size: 16px; /* 폰트 크기 설정 */
+    color: #333; /* 텍스트 색상 */
+    text-align: left; /* 왼쪽 정렬 */
+    display: block; /* 레이블이 줄 바꿈되도록 설정 */
+    margin-bottom: 5px; /* 레이블과 입력 필드 간 간격 */
+}
+
+.profile-container input {
+    font-family: 'Arial', sans-serif; /* 원하는 폰트 추가 */
+    font-size: 16px; /* 폰트 크기 설정 */
+    padding: 8px;
+    width: 100%; /* 입력 필드가 전체 너비를 차지하도록 설정 */
+    margin-bottom: 15px; /* 입력 필드와 버튼 간 간격 */
+    border: 1px solid #ccc; /* 테두리 설정 */
+    border-radius: 4px; /* 테두리 둥글게 설정 */
+}
