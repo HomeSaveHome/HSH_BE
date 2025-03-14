@@ -1,85 +1,11 @@
-<style>
-    .comment-card {
-        border-bottom: 1px solid #ccc;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-
-    .comment-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: bold;
-    }
-
-    .comment-body {
-        padding-left: 10px;
-        font-size: 16px;
-        color: #333;
-        text-align: left;
-    }
-
-    /* Additional styling for modal */
-    .modal-dialog {
-        max-width: 600px;
-    }
-
-    .modal-content {
-        padding: 20px;
-    }
-
-    .btn-primary, .btn-danger {
-        padding: 8px 16px !important;
-        border-radius: 5px !important;
-        font-weight: bold !important;
-        text-align: center !important;
-        display: inline-block !important;
-        font-size: 14px !important;
-        border: none !important;
-    }
-
-
-    .like-button {
-        background-color: #28a745;
-        color: white;
-        padding: 8px 16px;
-        border-radius: 5px;
-        font-weight: bold;
-        border: none;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    .like-button:hover {
-        background-color: #218838;
-    }
-
-    /* Add some spacing */
-    .btn-primary, .btn-danger {
-        padding: 8px 16px;
-        border-radius: 5px;
-        font-weight: bold;
-        text-align: center;
-        font-size: 14px;
-        border: none;
-    }
-
-    .btn-primary {
-        background-color: #104911;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-    }
-</style>
-
+<link rel="stylesheet" th:href="@{/css/comments/list.css}">
 <div id="comments-list">
     <div th:each="comment : ${commentDtos}" class="comment-card">
         <div class="comment-header">
             <strong th:text="${comment.author}"></strong>
             <!-- ✅ Like Button for Comments -->
 
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+            <div class="comments-btns">
                 <!-- Like Button -->
                 <form th:action="@{/api/likes/comments/{commentId}(commentId=${comment.id})}" method="post">
                     <input type="hidden" name="username" th:value="${loggedUsername}">
@@ -89,7 +15,7 @@
                 </form>
 
                 <!-- Edit/Delete Buttons -->
-                <div th:if="${loggedUsername == comment.author}" style="display: flex; gap: 5px;">
+                <div th:if="${loggedUsername == comment.author}">
                     <a th:href="@{/comments/{commentId}/edit(commentId=${comment.id})}"
                        class="btn btn-primary btn-sm text-white">
                         Edit
