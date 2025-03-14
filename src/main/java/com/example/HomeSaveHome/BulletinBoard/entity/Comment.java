@@ -2,7 +2,11 @@ package com.example.HomeSaveHome.BulletinBoard.entity;
 
 import com.example.HomeSaveHome.BulletinBoard.dto.CommentDto;
 import com.example.HomeSaveHome.user.model.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +31,8 @@ public class Comment {
 
 
     @Column
+    @NotBlank(message = "Please enter a comment.")
+
     private String body;
 
     @ManyToOne
