@@ -1,0 +1,33 @@
+.comment-box {
+    padding: 10px;
+    padding-right: 0;
+}
+
+.comment-box form {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.comment-box form textarea {
+    border: 1px solid var(--green-color);
+    border-radius: 5px;
+    resize: none;
+    width: 90%;
+    padding: 5px 10px; /* 내부 여백 */
+    font-size: 16px; /* 글자 크기 */
+    text-align: left; /* 왼쪽 정렬 */
+    display: flex;
+    align-items: center; /* 세로 가운데 정렬 */
+    line-height: 1.5; /* 줄 간격 조정 */
+    outline: none;
+}
+
+.comment-box form textarea::placeholder {
+    color: var(--medium-gray);
+    font-size: 15px;
+}
+
+#comment-create-btn {
+    margin-left: auto;
+    cursor: pointer;
+}
