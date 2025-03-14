@@ -42,7 +42,7 @@ public class EnergyUsedController {
     @PostMapping("/save")
     public String addEnergyUsage(@ModelAttribute EnergyUsedRequest request,
                                  RedirectAttributes redirectAttributes) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = userService.getCurrentUserByUsername();
         if (currentUser == null) {
             System.out.println("❌ 현재 로그인한 사용자를 찾을 수 없습니다.");
             return "redirect:/login"; // 로그인 페이지로 리디렉트
@@ -65,7 +65,7 @@ public class EnergyUsedController {
     @GetMapping("/used-months/{year}/{energyId}")
     @ResponseBody
     public List<Integer> getUsedMonths(@PathVariable int year, @PathVariable Long energyId) {
-        Long userId = userService.getCurrentUser().getId();
+        Long userId = userService.getCurrentUserByUsername().getId();
 
         return energyUsedService.getUsedMonthsByYear(userId, year, energyId);
     }
@@ -83,7 +83,7 @@ public class EnergyUsedController {
     // 저번 달 에너지 사용량 조회 & 최근 4개월 월 별 사용량 조회
     @GetMapping("/month-analytics")
     public String getMonthUsedAnalytics(Model model) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = userService.getCurrentUserByUsername();
         if (currentUser == null) {
             System.out.println("❌ 현재 로그인한 사용자를 찾을 수 없습니다.");
             return "redirect:/login"; // 로그인 페이지로 리디렉트
@@ -120,7 +120,7 @@ public class EnergyUsedController {
     public String getMonthlyEnergyUsed(@RequestParam(value = "year", required = false) Integer year,
             @RequestParam(value = "month", required = false) Integer month,
             Model model) {
-        Long userId = userService.getCurrentUser().getId();
+        Long userId = userService.getCurrentUserByUsername().getId();
 
         LocalDate now = LocalDate.now();
         int currentYear = now.getYear();
@@ -154,7 +154,7 @@ public class EnergyUsedController {
     public String getYearlyEnergyUsed(
             @RequestParam(value = "year", required = false) Integer year,
             Model model) {
-        Long userId = userService.getCurrentUser().getId();
+        Long userId = userService.getCurrentUserByUsername().getId();
 
         LocalDate now = LocalDate.now();
         int currentYear = now.getYear();

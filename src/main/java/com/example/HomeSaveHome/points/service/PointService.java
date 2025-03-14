@@ -17,7 +17,7 @@ public class PointService {
     public boolean addPoints(int amount) {
         // 현재 로그인된 사용자 정보는 실제로는 SecurityContext에서 가져와야 합니다.
         // 예시로, 임의 사용자에 포인트를 적립한다고 가정합니다.
-        // User currentUser = userService.getCurrentUser();
+        // User currentUser = userService.getCurrentUserByUsername();
         // currentUser.setPoint(currentUser.getPoint() + amount);
 
         // 포인트 적립 내역 추가 (여기서는 간단한 예시)
