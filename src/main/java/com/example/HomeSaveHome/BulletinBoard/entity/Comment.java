@@ -1,6 +1,5 @@
 package com.example.HomeSaveHome.BulletinBoard.entity;
 
-
 import com.example.HomeSaveHome.BulletinBoard.dto.CommentDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,24 +7,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-
-
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name="article_id")
+    @JoinColumn(name = "article_id")
     private Article article;
 
-    @Column
-    private String nickname;
 
     @Column
     private String body;
@@ -34,30 +32,47 @@ public class Comment {
     @JoinColumn(name = "board_id")
     private Board board;
 
-    public static Comment createComment(CommentDto dto, Article article) {
+    @Column(nullable = false)
+    private String author; // New field for author
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
+
+
+    public Comment(Long id, Article article, String body, Board board, String author) {
+        this.id = id;
+        this.article = article;
+        this.body = body;
+        this.board = board;
+        this.author = author;
+    }
+
+
+    public static Comment createComment(CommentDto dto, Article article, String author) {
         // Exception handling
-        // 1. If there's id in dto, IllegalArgumentException (there shouldn't be ID value before even creating a comment)
         if (dto.getId() != null) {
             throw new IllegalArgumentException("Can't create a comment! ID should be null.");
         }
-        // 2. If the parent article from dto and the article from the parameter are different, IllegalArgumentException (ID is different)
         if (dto.getArticleId() != article.getId()) {
             throw new IllegalArgumentException("Can't create a comment! Wrong Article ID.");
         }
-        // Create entity and convert
-        return new Comment(dto.getId(), article, dto.getNickname(), dto.getBody(), article.getBoard());
+        // Create comment entity with the author's username
+        return new Comment(dto.getId(), article, dto.getBody(), article.getBoard(), author);
     }
 
+
     public void patch(CommentDto dto) {
-        // Exception handling
-        if (this.id != dto.getId())
-            throw new IllegalArgumentException("Can't update comment! Wrong Article ID.");
-        // Patch the entity
-        if (dto.getNickname() != null) {
-            this.nickname = dto.getNickname();
+        if (this.id != dto.getId()) {
+            throw new IllegalArgumentException("Can't update comment! Wrong Comment ID.");
         }
+
         if (dto.getBody() != null) {
             this.body = dto.getBody();
         }
+    }
+
+    public int getLikeCount() {
+        return likes.size();
     }
 }

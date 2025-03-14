@@ -1,36 +1,32 @@
 package com.example.HomeSaveHome.BulletinBoard.controller;
 
 import com.example.HomeSaveHome.BulletinBoard.entity.Board;
-import com.example.HomeSaveHome.BulletinBoard.service.BoardService;
+import com.example.HomeSaveHome.BulletinBoard.repository.BoardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/boards")
+@Controller
 public class BoardController {
+
+    private final BoardRepository boardRepository;
+
     @Autowired
-    private BoardService boardService;
-
-    @GetMapping
-    public List<Board> getAllBoards() {
-        return boardService.getAllBoards();
+    public BoardController(BoardRepository boardRepository) {
+        this.boardRepository = boardRepository;
     }
 
-    @GetMapping("/{id}")
-    public Board getBoardById(@PathVariable Long id) {
-        return boardService.getBoardById(id);
-        // what to do if i wanna display articles?
+
+
+    @GetMapping("/boards")
+    public String showBoards(Model model) {
+        List<Board> boards = boardRepository.findAll();
+        model.addAttribute("boards", boards);
+        return "boards.html";
     }
 
-    @PostMapping
-    public Board createBoard(@RequestBody Board board) {
-        return boardService.createBoard(board);
-    }
 
-    @DeleteMapping("/{id}")
-    public void deleteBoard(@PathVariable Long id) {
-        boardService.deleteBoard(id);
-    }
 }

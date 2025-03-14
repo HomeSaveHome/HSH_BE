@@ -1,0 +1,70 @@
+.header {
+    padding: 0 60px;
+    padding-top: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header a {
+    color: black;
+    text-decoration: none;
+}
+
+.logo {
+    font-size: 30px;
+}
+
+/* navbar */
+.navbar {
+    display: flex;
+    gap: 90px;
+    align-items: center;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-item a, .navbar > a {
+    font-size: 20px;
+    display: block;
+}
+
+/* 드롭다운 스타일 */
+.dropdown-content {
+    position: absolute;
+    left: -20px;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    min-width: 150px;
+    z-index: 10;
+    overflow: hidden;
+    padding: 5px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.dropdown-content a {
+    display: block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: black;
+    transition: background 0.3s;
+    font-size: 16px;
+}
+
+.dropdown-content a:hover {
+    background: #f1f1f1;
+}
+
+/* 모든 메뉴에서 호버 또는 클릭 시 드롭다운 표시 */
+.nav-item:hover .dropdown-content,
+.nav-item.active .dropdown-content,
+.dropdown-content:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}

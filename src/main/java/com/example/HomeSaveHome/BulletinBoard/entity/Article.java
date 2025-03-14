@@ -1,34 +1,52 @@
 package com.example.HomeSaveHome.BulletinBoard.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-@AllArgsConstructor
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+
 @NoArgsConstructor
 @ToString
 
 @Entity
 @Getter
 public class Article {
-@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-@Column
+    @Column
+    @Setter
     private String title;
-@Column
+    @Column
+    @Setter
     private String content;
-@Column
+    @Setter
+    @Column
     private String author;
-@Column
-    private String date;
 
+    @CreationTimestamp
+    @Column
+    private LocalDateTime date;
+
+    @Setter
     @ManyToOne
     @JoinColumn(name = "board_id")
     private Board board;
 
+    @Setter
+    @Transient
+    private String formattedDate;
+
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
 
     public void patch(Article article) {
         if (article.title != null) {
@@ -38,4 +56,18 @@ public class Article {
             this.content = article.content;
         }
     }
+
+    public Article(Long id, String title, String content, String author, LocalDateTime date, Board board) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.author = author;
+        this.date = date;
+        this.board = board;
+    }
+
+    public int getCommentCount() {
+        return (comments != null) ? comments.size() : 0;
+    }
+
 }
