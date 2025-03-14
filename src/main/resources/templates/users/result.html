@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 결과</title>
+    <link rel="stylesheet" href="/css/resultpage.css">
+</head>
+<body>
+<div id="result-container">
+    <div class="login-box">
+        <h1 class="logo">HOME <span>SAVE</span> HOME</h1>
+        <h2>회원가입 결과</h2>
+        <p th:if="${message}" th:text="${message}" class="message"></p>
+        <div class="links">
+            <a href="/users/signup">회원가입 페이지로 돌아가기</a>
+            <a href="/users/login">로그인 페이지로 돌아가기</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

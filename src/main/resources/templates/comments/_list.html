@@ -1,0 +1,106 @@
+<link rel="stylesheet" th:href="@{/css/comments/list.css}">
+<div id="comments-list">
+    <div th:each="comment : ${commentDtos}" class="comment-card">
+        <div class="comment-header">
+            <strong th:text="${comment.author}"></strong>
+            <!-- ✅ Like Button for Comments -->
+
+            <div class="comments-btns">
+                <!-- Like Button -->
+                <form th:action="@{/api/likes/comments/{commentId}(commentId=${comment.id})}" method="post">
+                    <input type="hidden" name="username" th:value="${loggedUsername}">
+                    <button type="submit" class="like-button">
+                        👍 Like (<span th:text="${comment.likeCount}"></span>)
+                    </button>
+                </form>
+
+                <!-- Edit/Delete Buttons -->
+                <div th:if="${loggedUsername == comment.author}">
+                    <a th:href="@{/comments/{commentId}/edit(commentId=${comment.id})}"
+                       class="btn btn-primary btn-sm text-white">
+                        Edit
+                    </a>
+                    <a href="javascript:void(0);"
+                       th:attr="data-url=@{/api/comments/{commentId}(commentId=${comment.id})}"
+                       class="btn btn-danger btn-sm text-white delete-comment">
+                        Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="comment-body">
+            <p th:text="${comment.body}"></p>
+        </div>
+
+
+    </div>
+
+    <!-- ✅ Notification Popup -->
+    <div id="comment-notification" class="notification" style="display: none;">
+        <p id="comment-notification-text"></p>
+    </div>
+
+    <!-- ✅ JavaScript for Showing Popup -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let message = "[[${likeMessage}]]"; // ✅ Retrieve flash message
+
+            if (message && message !== "null") {
+                showCommentNotification(message);
+            }
+        });
+
+        function showCommentNotification(text) {
+            let notification = document.getElementById("comment-notification");
+            let notificationText = document.getElementById("comment-notification-text");
+
+            notificationText.innerText = text;
+            notification.style.display = "block";
+
+            // ✅ Hide after 3 seconds
+            setTimeout(() => {
+                notification.style.display = "none";
+            }, 3000);
+        }
+    </script>
+
+    <!-- ✅ Add CSS for Popup Notification -->
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".delete-comment").forEach(button => {
+                button.addEventListener("click", function () {
+                    let url = this.getAttribute("data-url");
+
+                    if (confirm("Are you sure you want to delete this comment?")) {
+                        fetch(url, { method: "DELETE" }) // ✅ Correctly using DELETE method
+                            .then(response => {
+                                if (response.ok) {
+                                    alert("Comment deleted successfully!");
+                                    window.location.reload(); // ✅ Reload page after deletion
+                                } else {
+                                    alert("Failed to delete comment!");
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                    }
+                });
+            });
+        });
+    </script>
+</div>

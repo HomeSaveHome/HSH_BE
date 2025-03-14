@@ -15,8 +15,9 @@ public class Energy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;  // 에너지 ID
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable=false, length=100, unique=true)
-    private String energyName;  // 에너지 이름 (전기, 가스 ... )
+    private EnergyType energyType;  // 에너지 이름 (전기, 가스 ... )
 
     @OneToMany(mappedBy = "energy", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EnergyUsed> energyUsedList;

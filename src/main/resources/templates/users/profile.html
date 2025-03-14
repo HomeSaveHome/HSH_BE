@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필</title>
+    <link rel="stylesheet" href="/css/profilepage.css">
+    <script>
+        function checkDuplicate(field, value) {
+            fetch(`/users/check-duplicate?field=${field}&value=${encodeURIComponent(value)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        alert(`${field === 'username' ? '이름' : '이메일'}이 이미 존재합니다.`);
+                        document.getElementById(field).value = ''; // 중복이면 입력 초기화
+                    }
+                })
+                .catch(error => console.error("중복 확인 중 오류 발생:", error));
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("username").addEventListener("blur", function() {
+                checkDuplicate("username", this.value);
+            });
+
+            document.getElementById("email").addEventListener("blur", function() {
+                checkDuplicate("email", this.value);
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="profile-container">
+    <h1 class="logo">HOME <span>SAVE</span> HOME</h1>
+
+    <!-- 오류 메시지 표시 -->
+    <div th:if="${error}" class="alert alert-danger">
+        <p th:text="${error}"></p>
+    </div>
+
+    <!-- 성공 메시지 표시 -->
+    <div th:if="${message}" class="alert alert-success">
+        <p id="successMessage" th:text="${message}"></p>
+    </div>
+
+    <h3>사용자 정보</h3>
+    <p>이름: <span th:text="${user.username}">[이름]</span></p>
+    <p>이메일: <span th:text="${user.email}">[이메일]</span></p>
+    <p>포인트: <span th:text="${user.point}">[포인트]</span></p>
+    <p>레벨: <span th:text="${user.level}">[레벨]</span></p>
+
+    <h3>프로필 수정</h3>
+    <form action="/users/me" method="post" onsubmit="showAlert()">
+        <label for="username">이름:</label>
+        <input type="text" id="username" name="username" placeholder="입력하세요" required /><br/>
+
+        <label for="email">이메일:</label>
+        <input type="email" id="email" name="email" placeholder="입력하세요" required /><br/>
+
+        <button type="submit">수정하기</button>
+    </form>
+
+
+    <div class="links">
+        <a href="/main">메인화면으로</a>
+        <a href="/users/logout">로그아웃</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>댓글 수정</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/comments/_edit.css}">
+
+</head>
+<body>
+
+<div th:replace="header :: header"></div>
+
+
+<div class="content-container">
+    <h2>댓글 수정</h2>
+
+    <form id="comment-edit-form">
+        <input type="hidden" id="edit-comment-id" th:value="${comment.id}">
+        <input type="hidden" id="edit-comment-article-id" th:value="${comment.article.id}">
+        <input type="hidden" id="edit-comment-board-id" th:value="${comment.article.board.id}">
+
+        <div class="form-group">
+            <label class="form-label">내용</label>
+            <textarea class="form-control" rows="5" id="edit-comment-body" th:text="${comment.body}" required></textarea>
+        </div>
+
+        <button type="button" class="submit-btn" onclick="submitPatch()">댓글 수정</button>
+        <a th:href="@{/boards/{boardId}/articles/{id}(boardId=${comment.article.board.id}, id=${comment.article.id})}" class="back-btn">뒤로 가기</a>
+    </form>
+
+    <script>
+        function submitPatch() {
+            let commentId = document.getElementById("edit-comment-id").value;
+            let body = document.getElementById("edit-comment-body").value;
+            let articleId = document.getElementById("edit-comment-article-id").value;
+            let boardId = document.getElementById("edit-comment-board-id").value;
+
+            fetch(`/api/comments/${commentId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: commentId, body: body })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Comment updated successfully!");
+
+                        // ✅ Redirect to the original article page
+                        window.location.href = `/boards/${boardId}/articles/${articleId}`;
+                    } else {
+                        alert("Failed to update comment!");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    </script>
+</div>
+</body>
+</html>

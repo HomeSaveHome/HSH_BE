@@ -1,0 +1,41 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>header</title>
+</head>
+<body>
+    <div class="header" th:fragment="header">
+        <a class="logo" href="/main">HomeSaveHome</a>
+        <div class="navbar">
+            <div class="nav-item">
+                <a href="#">USAGE</a>
+                <div class="dropdown-content">
+                    <a href="/energyUsed/input">사용량 입력</a>
+                    <a href="/energyUsed/monthly">월별 조회</a>
+                    <a href="/energyUsed/yearly">연도별 조회</a>
+                </div>
+            </div>
+            <div class="nav-item">
+                <a href="#">GOAL</a>
+                <div class="dropdown-content">
+                    <a href="#">월간 목표 입력</a>
+                    <a href="#">연간 목표 입력</a>
+                </div>
+            </div>
+            <div class="nav-item">
+                <a href="/boards">COMMUNITY</a>
+                <div class="dropdown-content">
+                    <a href="/boards/1/articles">일반 게시판</a>
+                    <a href="/boards/2/articles">절약 팁 게시판</a>
+                    <a href="/boards/3/articles">고객 문의</a>
+                </div>
+            </div>
+            <a href="/users/profile"><img th:src="@{/images/user.png}" alt="user"></a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<link rel="stylesheet" th:href="@{/css/comments/new.css}">
+<div class="comment-box">
+    <form>
+        <textarea class="form-control" id="new-comment-body" rows="1" placeholder="댓글을 작성해주세요"></textarea>
+        <input type="hidden" id="board-id" th:value="${boardId}">
+        <input type="hidden" id="new-comment-article-id" th:value="${article.id}">
+
+        <button type="button" class="btn btn-primary" id="comment-create-btn">댓글 작성하기</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".edit-comment-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let commentId = this.getAttribute("data-comment-id");
+                let editSection = document.getElementById("edit-comment-section-" + commentId);
+                if (editSection) {
+                    editSection.style.display = "block";
+                }
+            });
+        });
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const commentCreateBtn = document.querySelector("#comment-create-btn");
+
+        commentCreateBtn.addEventListener("click", function() {
+            const boardId = document.querySelector("#board-id")?.value;
+            const articleId = document.querySelector("#new-comment-article-id")?.value;
+
+            if (!boardId || !articleId) {
+                alert("Error: Could not find Board ID or Article ID.");
+                return;
+            }
+
+            const comment = {
+                body: document.querySelector("#new-comment-body").value,
+                articleId: articleId
+            };
+
+            fetch(`/api/boards/${boardId}/articles/${articleId}/comments`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(comment)
+            }).then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        alert("Failed to create comment: " + (data.message || "Unknown error"));
+                    });
+                }
+                alert("Comment created successfully!");
+                window.location.reload();
+            }).catch(error => {
+                alert("Unexpected error occurred!");
+            });
+        });
+    });
+</script>

@@ -1,65 +1,146 @@
 package com.example.HomeSaveHome.user.service;
-// 실제 DB에 저장된 로직을 여기에 작성
 
 import com.example.HomeSaveHome.user.model.User;
+import com.example.HomeSaveHome.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
-    // 회원가입 처리 메서드
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // 회원가입 처리 메서드 (비밀번호 암호화 제거, 평문 그대로 저장)
     public boolean registerUser(User user) {
-        System.out.println("회원가입 정보: " + user.getUsername() + ", " + user.getEmail());
-        return true;
-    }
-
-    // 로그인 인증 처리 메서드
-    public boolean authenticateUser(String username, String password) {
-        // 아직 DB 연동 안해서 ID : testuser와 비밀번호 password123만 제공
-        return "testuser".equals(username) && "password123".equals(password);
-    }
-
-    // 로그아웃 로직
-    public boolean logoutUser() {
-        System.out.println("사용자 로그아웃 처리!");
-        return true;
-    }
-
-    // UserService.java 내부에 현재 사용자 반환 메서드 (기존 예시 코드 수정)
-    public User getCurrentUser() {
-        // 실제 구현 시, SecurityContext 또는 세션을 통해 현재 로그인 사용자를 가져옵니다.
-        User user = new User();
-        user.setUsername("testuser");
-        user.setEmail("testuser@example.com");
-        user.setPoint(1000); // 예시 포인트
-        user.setLevel(5);    // 예시 레벨
-        return user;
-    }
-
-
-    public User updateUserProfile(User user) {
-        // 실제 DB 업데이트 로직 구현. 여기선 단순 로그 출력 예시.
-        System.out.println("프로필 업데이트: " + user.getUsername() + ", " + user.getEmail());
-        // 업데이트가 성공했다고 가정하고 user 객체를 반환.
-        return user;
-    }
-
-    public boolean deleteUser() {
-        // 실제 구현 시, 현재 로그인된 사용자 삭제 로직 구현
-        System.out.println("사용자 삭제 처리");
-        return true;
-    }
-
-    public User getUserById(String userid) {
-        // 실제 구현 시, DB에서 userid를 이용하여 사용자 정보를 조회합니다.
-        // 예시로, testuser인 경우 반환, 아닐 경우 null 반환
-        if ("testuser".equals(userid)) {
-            User user = new User();
-            user.setUsername("testuser");
-            user.setEmail("testuser@example.com");
-            return user;
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            return false;
         }
-        return null;
+        if (userRepository.findByEmail(user.getEmail()) != null) {
+            return false;
+        }
+
+        // 비밀번호 암호화
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // 로그 찍기 (이게 중요)
+        System.out.println("가입 시도하는 유저 정보: " + user);
+
+        userRepository.save(user);
+        return true;
     }
 
-}
+    // 기존 로그인 인증 (평문 비밀번호 비교)
+    public boolean authenticateUser(String email, String password) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            System.out.println("DB에 저장된 비밀번호: " + user.getPassword());
+            System.out.println("입력된 비밀번호: " + password);
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                return true;  // 인증 성공
+            }
+        }
+        return false;  // 인증 실패
+    }
 
+    // 새로운 로그인 처리 (SecurityContext 저장까지 포함, 평문 비밀번호 비교)
+    public boolean authenticateAndSetContext(String email, String password) {
+        User user = userRepository.findByEmail(email);
+        if (user != null && user.getPassword().equals(password)) {
+            List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            System.out.println("로그인 성공, SecurityContext 설정됨: " + SecurityContextHolder.getContext().getAuthentication());
+            return true;
+        }
+        return false;
+    }
+
+
+    // 현재 로그인된 사용자 반환 (SecurityContext 활용)
+    public User getCurrentUserByUsername() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = userRepository.findByEmail(email).getUsername();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+    }
+
+    // 프로필 수정 (비밀번호 암호화 제거, 평문 비밀번호 그대로 저장)
+
+    public boolean updateUserProfile(User user) {
+        Optional<User> existingUser = userRepository.findById(user.getId());
+
+        if (existingUser.isPresent()) {
+            User updatedUser = existingUser.get();
+
+            boolean isUsernameChanged = !updatedUser.getUsername().equals(user.getUsername());
+            boolean isEmailChanged = !updatedUser.getEmail().equals(user.getEmail());
+
+            if (isUsernameChanged && userRepository.existsByUsername(user.getUsername())) {
+                return false; // 중복된 username 존재
+            }
+            if (isEmailChanged && userRepository.existsByEmail(user.getEmail())) {
+                return false; // 중복된 email 존재
+            }
+
+            updatedUser.setUsername(user.getUsername());
+            updatedUser.setEmail(user.getEmail());
+
+            userRepository.save(updatedUser);
+            return true;
+        }
+        return false;
+    }
+
+    // 사용자 삭제
+    public boolean deleteUser(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isPresent()) {
+            userRepository.delete(user.get());
+            return true;
+        }
+        return false;
+    }
+
+    // ID로 사용자 조회
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    public User getLoggedInUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(principal);
+        if (principal instanceof UserDetails) {
+            String email = ((UserDetails) principal).getUsername();
+            //System.out.println("username: " + username);
+
+            User optionalUser = userRepository.findByEmail(email);  // 사용자 정보 가져오기
+            if(optionalUser == null) {
+                throw new RuntimeException("로그인된 사용자가 없습니다.");
+            }
+            // Optional<User>에서 값을 추출하여 반환
+            return optionalUser;  // 값이 없으면 예외 던짐
+        }
+        throw new RuntimeException("로그인된 사용자가 없습니다.");
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+}

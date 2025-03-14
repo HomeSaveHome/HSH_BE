@@ -1,0 +1,183 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/energy/yearly-usage.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div th:replace="~{header :: header}"></div>
+<div class="yearly-usage-container">
+    <h2>연도별 에너지 사용량</h2>
+    <div class="yearly-usage-content">
+        <!-- 연도 선택 드롭다운 -->
+        <form th:action="@{/energyUsed/yearly}" method="get">
+            <select name="year">
+                <option th:each="y : ${#numbers.sequence(2010, 2025)}"
+                        th:value="${y}" th:text="${y} + '년'"
+                        th:selected="${selectedYear != null and selectedYear == y}"></option>
+            </select>
+            <button type="submit">조회</button>
+        </form>
+
+        <div class="yearly-usage-content-bottom">
+            <!-- 에너지 사용량 바 -->
+            <div class="usage-bar-container">
+                <div class="bar-wrapper" th:each="data : ${currentYearData}">
+                    <div class="bar"
+                         th:style="'height:' + (${data.totalAmount} > 0 ? ${data.totalAmount} / 1000 : 0) + 'px; background-color:' + (${data.energyType.name() == 'GAS' ? '#104911' : '#F6D365'})">
+                        <span class="bar-value" th:text="${#numbers.formatInteger(data.totalAmount, 3, 'COMMA') + (data.energyType.name() == 'GAS' ? 'm³' : 'KWh')}"></span>
+                    </div>
+                    <div class="bar-label" th:text="${data.energyType}"></div>
+                </div>
+            </div>
+
+            <!-- 에너지 사용 금액 -->
+            <div class="left-container">
+                <div class="price-card" th:each="data : ${currentYearData}">
+                    <h3 th:switch="${data.energyType.name()}">
+                        <span th:case="'GAS'">가스</span>
+                        <span th:case="'ELECTRICITY'">전기</span>
+                    </h3>
+                    <p th:text="'₩ ' + (${data.totalPrice} != null ? ${#numbers.formatInteger(data.totalPrice, 3, 'COMMA')} : 0)"></p>
+                    <p class="diff-desc" th:if="${previousYearData[data.energyType].totalPrice != null}">
+                        <span th:with="rate=${yearlyChangeRates[data.energyType]}">
+                            <img th:src="@{/images/{arrow}.svg(arrow=${rate < 0 ? 'up-arrow' : 'down-arrow'})}" alt="">
+                            <span th:text="'전년도 대비 ' + ${rate < 0 ? ('+' + (-rate)) : ('-' + rate)} + '%'"
+                                  th:style="${rate < 0} ? 'color: #14AE5C;' : 'color: red;'">
+                            </span>
+                        </span>
+                    </p>
+                    <!-- 전년도 데이터가 없는 경우 -->
+                    <p class="diff-desc no-data" th:if="${previousYearData[data.energyType].totalPrice == null}">
+                        <img th:src="@{/images/no.svg}" alt="데이터 없음">
+                        전년도 사용량 없음
+                    </p>
+                </div>
+            </div>
+            <div class="right-container">
+                <!-- 월 평균 사용 금액 -->
+                <div class="avg-container">
+                    <h3>월 평균 사용 금액</h3>
+                    <div class="avg-price-card" th:each="entry : ${avgChangeRates}">
+                        <h3 th:switch="${entry.key.name()}">
+                            <span th:case="'GAS'">가스</span>
+                            <span th:case="'ELECTRICITY'">전기</span>
+                        </h3>
+                        <p th:text="'₩ ' + (${avgUsedMap[entry.key]} != null ? ${#numbers.formatInteger(avgUsedMap[entry.key], 3, 'COMMA')} : 0)"></p>
+                        <p class="avg-diff" th:if="${previousYearData[entry.key].totalPrice != null}">
+                            <span th:with="rate=${yearlyChangeRates[entry.key]}">
+                                <img th:src="@{/images/{arrow}.svg(arrow=${rate < 0 ? 'up-arrow' : 'down-arrow'})}" alt="">
+                                <span th:text="'전년도 대비 ' + ${rate < 0 ? ('+' + (-rate)) : ('-' + rate)} + '%'"
+                                      th:style="${rate < 0} ? 'color: #14AE5C;' : 'color: red;'">
+                                </span>
+                            </span>
+                        </p>
+                        <!-- 전년도 데이터가 없는 경우 -->
+                        <p class="avg-diff no-data" th:if="${previousYearData[entry.key].totalPrice == null}">
+                            <img th:src="@{/images/no.svg}" alt="데이터 없음">
+                            전년도 사용량 없음
+                        </p>
+                    </div>
+                </div>
+                <!-- 목표 달성률(아직 하드코딩) -->
+                <div class="goal-container">
+                    <h3>목표 달성률</h3>
+                    <div class="goal-result-card" th:each="data : ${currentYearData}"
+                            th:if="${data.energyType.name() == 'GAS'}"> <!-- 임시 추가 -->
+                        <canvas th:id="'chart-' + ${data.energyType.name()}"
+                                th:attr="data-goal=${data.totalPrice}, data-type=${data.energyType.name()}"
+                                width="100" height="100"></canvas>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                document.querySelectorAll("canvas[id^='chart-']").forEach(function (canvas) {
+                                    var goalPercent = parseInt(canvas.getAttribute("data-goal"), 10);
+                                    var energyType = canvas.getAttribute("data-type") === "GAS" ? "가스" : "전기";
+
+                                    if (isNaN(goalPercent) || goalPercent < 0) {
+                                        goalPercent = 0;
+                                    }
+
+                                    var ctx = canvas.getContext('2d');
+
+                                    if (canvas.chartInstance) {
+                                        canvas.chartInstance.destroy();
+                                    }
+
+                                    var hasData = goalPercent !== null && goalPercent > 0;
+
+                                    new Chart(ctx, {
+                                        type: 'doughnut',
+                                        data: {
+                                            datasets: [{
+                                                data: hasData ? [goalPercent, 100 - goalPercent] : [100, 0],
+                                                backgroundColor: hasData ? [goalPercent > 100 ? 'red' : 'green', '#D9D9D9'] : ['#D9D9D9', '#D9D9D9'],
+                                                borderWidth: 0
+                                            }]
+                                        },
+                                        options: {
+                                            cutout: '75%',
+                                            plugins: {
+                                                legend: { display: false },
+                                                tooltip: { enabled: false },
+                                                centerText: {
+                                                    energy: energyType,
+                                                    percent: goalPercent + "%",
+                                                    fontSize: 14, // 🎯 폰트 크기 줄이기
+                                                    color: '#333'
+                                                }
+                                            }
+                                        },
+                                        plugins: [{
+                                            id: 'centerText',
+                                            beforeDraw: function (chart) {
+                                                var width = chart.width, height = chart.height;
+                                                var ctx = chart.ctx;
+                                                ctx.restore();
+                                                var fontSize = height * 0.12; // 🎯 차트 크기에 맞춰 폰트 크기 동적 조절
+                                                ctx.font = fontSize + "px sans-serif";
+                                                ctx.textBaseline = "middle";
+                                                ctx.textAlign = "center";
+
+                                                var energyText = chart.options.plugins.centerText.energy;
+                                                var percentText = chart.options.plugins.centerText.percent;
+
+                                                var textX = width / 2;
+                                                var textY = height / 2 - fontSize / 2;
+                                                var textY2 = textY + fontSize + 5;
+
+                                                ctx.fillStyle = chart.options.plugins.centerText.color;
+                                                ctx.fillText(energyText, textX, textY);
+                                                ctx.fillText(percentText, textX, textY2);
+
+                                                ctx.save();
+                                            }
+                                        }]
+                                    });
+                                });
+                            });
+                        </script>
+                        <div class="goal-price-container">
+                            <div class="goal-price">
+                                <p th:text="'₩' + ${#numbers.formatInteger(data.totalPrice ?: 0, 3, 'COMMA')}"></p>
+                                <p>Goal</p>
+                            </div>
+                            <div class="usage-price">
+                                <p th:text="'₩' + ${#numbers.formatInteger(data.totalPrice ?: 0, 3, 'COMMA')}"></p>
+                                <p>Usage</p>
+                            </div>
+                        </div>
+                        <p th:if="${data.totalPrice == 100}" class="success">🎉 목표 달성 성공! 🎉</p>
+                        <p th:if="${data.totalPrice != 100}" class="fail">😵 목표 달성 실패! 😵</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>

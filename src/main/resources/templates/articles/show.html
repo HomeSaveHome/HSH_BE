@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${article.title}">Article</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/articles/show.css}">
+</head>
+<body>
+<div th:replace="header :: header"></div>
+<div class="content-container">
+    <!-- Article Title and Metadata -->
+    <div class="article-header">
+        <h2 class="article-title" th:text="${article.title}"></h2>
+        <div class="article-meta">
+            <strong th:text="${article.author}"></strong> |
+            <span th:text="${article.formattedDate}"></span>
+        </div>
+    </div>
+
+    <!-- ✅ Like Button for Articles -->
+    <div class="article-btns">
+        <form th:action="@{/api/likes/articles/{articleId}(articleId=${article.id})}" method="post">
+            <input type="hidden" name="username" th:value="${loggedUsername}">
+            <button type="submit" class="like-button">
+                👍 Like (<span th:text="${article.likes.size()}"></span>)
+            </button>
+        </form>
+
+        <!-- ✅ Show Edit/Delete Buttons Only If User is the Author -->
+        <div th:if="${loggedUsername != null and loggedUsername == article.author}">
+            <a th:href="@{/boards/{boardId}/articles/{articleId}/edit(boardId=${boardId}, articleId=${article.id})}" class="btn btn-primary">Edit</a>
+            <a th:href="@{/boards/{boardId}/articles/{articleId}/delete(boardId=${boardId}, articleId=${article.id})}" class="btn btn-danger">Delete</a>
+        </div>
+    </div>
+    <!-- Article Content -->
+    <div class="article-content">
+        <p th:text="${article.content}"></p>
+    </div>
+
+    <!-- ✅ Comments Section -->
+    <div class="comment-section">
+        <h3>댓글</h3>
+        <div th:insert="comments/_comments.html"></div>
+    </div>
+
+    <!-- ✅ "Go to Article List" Button -->
+    <a th:href="@{/boards/{boardId}/articles(boardId=${boardId})}" class="btn btn-secondary">게시글 목록</a>
+</div>
+
+<!-- ✅ Notification Popup -->
+<div id="notification" class="notification" style="display: none;">
+    <p id="notification-text"></p>
+</div>
+
+<!-- ✅ JavaScript for Showing Popup -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let message = "[[${likeMessage}]]"; // ✅ Retrieve flash message
+
+        if (message && message !== "null") {
+            showNotification(message);
+        }
+    });
+
+    function showNotification(text) {
+        let notification = document.getElementById("notification");
+        let notificationText = document.getElementById("notification-text");
+
+        notificationText.innerText = text;
+        notification.style.display = "block";
+
+        // ✅ Hide after 3 seconds
+        setTimeout(() => {
+            notification.style.display = "none";
+        }, 3000);
+    }
+</script>
+
+<!-- ✅ Add CSS for Popup Notification -->
+<style>
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+</style>
+
+
+
+</body>
+</html>

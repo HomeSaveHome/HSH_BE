@@ -1,11 +1,13 @@
 package com.example.HomeSaveHome.BulletinBoard.repository;
 
 import com.example.HomeSaveHome.BulletinBoard.entity.Article;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public interface ArticleRepository extends CrudRepository<Article, Long> {
-    @Override
-    ArrayList<Article> findAll(); // Iterable --> ArrayList type casting.
+public interface ArticleRepository extends JpaRepository<Article, Long> {
+    List<Article> findByBoardId(Long boardId);
+    Page<Article> findByBoardId(Long boardId, Pageable pageable);
 }

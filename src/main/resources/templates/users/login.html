@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 페이지</title>
+    <link rel="stylesheet" href="/css/loginpage.css">
+</head>
+<body>
+
+<div id="login-container" style="display: flex;">
+    <div class="login-box">
+        <h1 class="logo">HOME <span>SAVE</span> HOME</h1>
+        <br>
+        <br>
+
+        <form action="/users/login" method="post">
+            <input type="email" name="email" id="email" placeholder="이메일" required>
+            <input type="password" name="password" id="password" placeholder="비밀번호" required>
+            <button type="submit" class="login-btn">로그인</button>
+        </form>
+
+        <div class="links">
+            <a href="/users/signup">1초만에 회원가입</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        document.getElementById("login-container").style.display = "flex";
+    };
+</script>
+
+</body>
+</html>
