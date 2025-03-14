@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${boardName}">Board</title>
+    <link rel="stylesheet" th:href="@{/css/onboarding.css}">
+    <style>
+        .board-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #104911;
+        }
+        .search-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin: 10px 0;
+        }
+        .search-bar input {
+            padding: 8px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .search-bar button {
+            padding: 8px 12px;
+            margin-left: 5px;
+            background-color: #104911;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-bar button:hover {
+            background-color: #0b3c0d;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #104911;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .new-post-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+            margin-bottom: -50px;
+        }
+        .new-post-btn {
+            background-color: #FDD835;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .new-post-btn:hover {
+            background-color: #E6C300;
+        }
+        /* ✅ Browse Boards Button Styling */
+        .browse-boards-container {
+            display: flex;
+            justify-content: center;
+            margin-top: -10px;
+        }
+        .browse-boards-btn {
+            background-color: #104911;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .browse-boards-btn:hover {
+            background-color: #0b3c0d;
+        }
+
+        .pagination-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .pagination-btn {
+            background-color: #104911;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+            margin: 0 10px;
+        }
+
+        .pagination-btn:hover {
+            background-color: #0b3c0d;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ Include the header -->
+<div th:replace="header :: header"></div>
+
+<div class="board-container">
+    <div class="board-header">
+        <h2 th:text="${boardName}"></h2>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <input type="text" placeholder="Search..." id="searchInput">
+        <button onclick="searchArticles()">Search</button>
+    </div>
+
+    <!-- Board Table -->
+    <table>
+        <thead>
+        <tr>
+            <th style="width: 50%;">Title</th>
+            <th style="width: 15%;">Author</th>
+            <th style="width: 15%;">Date</th>
+            <th style="width: 10%;">Like Count</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="article : ${articlePage.content}">
+            <td>
+                <a th:href="@{/boards/{boardId}/articles/{id}(boardId=${boardId}, id=${article.id})}" th:text="${article.title}"></a>
+                <span th:if="${article.getCommentCount() > 0}"> [<span th:text="${article.getCommentCount()}"></span>]</span>
+            </td>
+
+            <td th:text="${article.author}"></td>
+            <td th:text="${article.formattedDate}"></td>
+            <td th:text="${article.likes.size()}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- New Post Button -->
+    <div class="new-post-container">
+        <a th:href="@{/boards/{boardId}/articles/new(boardId=${boardId})}" class="new-post-btn">New Post</a>
+    </div>
+</div>
+
+<!-- ✅ Browse Boards Button at the Bottom -->
+<div class="browse-boards-container">
+    <a href="/boards" class="browse-boards-btn">Browse Boards</a>
+</div>
+
+<script>
+    function searchArticles() {
+        let query = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.querySelectorAll("tbody tr");
+
+        rows.forEach(row => {
+            let title = row.querySelector("td:first-child").innerText.toLowerCase();
+            row.style.display = title.includes(query) ? "" : "none";
+        });
+    }
+</script>
+
+
+
+<!-- ✅ Pagination Controls -->
+<div class="pagination-container">
+    <a th:if="${currentPage > 0}" th:href="@{/boards/{boardId}/articles(boardId=${boardId}, page=${currentPage - 1}, size=7)}" class="pagination-btn">⬅ Previous</a>
+
+    <span>Page <span th:text="${currentPage + 1}"></span> of <span th:text="${totalPages}"></span></span>
+
+    <a th:if="${currentPage + 1 < totalPages}" th:href="@{/boards/{boardId}/articles(boardId=${boardId}, page=${currentPage + 1}, size=7)}" class="pagination-btn">Next ➡</a>
+</div>
+
+
+
+
+</body>
+
+
+</html>

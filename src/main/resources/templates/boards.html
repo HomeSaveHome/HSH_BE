@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Boards</title>
+    <link rel="stylesheet" th:href="@{/css/onboarding.css}">
+    <style>
+        /* ✅ Pin the header to the top */
+        .header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        /* ✅ Make sure content does not overlap with fixed header */
+        .content-container {
+            margin-top: 80px; /* Adjust to prevent overlap */
+        }
+
+        .board-container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 20px auto 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .board-header {
+            font-size: 24px;
+            font-weight: bold;
+            border-bottom: 2px solid #104911;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .board-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .board {
+            background-color: #f8f9fa;
+            border: 2px solid #104911;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+
+        .board:hover {
+            background-color: #e6e6e6;
+            transform: scale(1.05);
+        }
+
+        .board a {
+            text-decoration: none;
+            color: #104911;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .board a:hover {
+            color: #0b3c0d;
+        }
+
+        .board p {
+            font-size: 16px;
+            color: #555;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ Pin the header to the top -->
+<div class="header-container">
+    <div th:replace="header :: header"></div>
+</div>
+
+<div class="content-container">
+    <div class="board-container">
+        <div class="board-header">
+            Select a Board
+        </div>
+
+        <div class="board-list">
+            <div th:each="board : ${boards}" class="board">
+                <a th:href="@{/boards/{id}/articles(id=${board.id})}" th:text="${board.name}"></a>
+                <p th:text="${board.description}"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

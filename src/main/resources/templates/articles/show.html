@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${article.title}">Article</title>
+    <link rel="stylesheet" th:href="@{/css/onboarding.css}">
+    <style>
+        .header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .content-container {
+            margin-top: 100px;
+            width: 90%;
+            max-width: 1100px;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #104911;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .article-title {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .article-meta {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .article-content {
+            margin-top: 15px;
+            padding: 15px;
+            font-size: 18px;
+            line-height: 1.6;
+            border-bottom: 2px solid #104911;
+            text-align: left;
+        }
+
+        .comment-section {
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #104911;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+            display: block;
+            width: fit-content;
+            margin: 20px auto 0 auto;
+        }
+
+        /* Like button styles */
+        .like-button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .like-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ Include the header -->
+<div class="header-container">
+    <div th:replace="header :: header"></div>
+</div>
+
+<div class="content-container">
+    <!-- Article Title and Metadata -->
+    <div class="article-header">
+        <h2 class="article-title" th:text="${article.title}"></h2>
+        <div class="article-meta">
+            <strong th:text="${article.author}"></strong> |
+            <span th:text="${article.formattedDate}"></span>
+        </div>
+    </div>
+
+    <!-- ✅ Like Button for Articles -->
+    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+
+    <form th:action="@{/api/likes/articles/{articleId}(articleId=${article.id})}" method="post" style="margin-bottom: 5px;">
+        <input type="hidden" name="username" th:value="${loggedUsername}">
+        <button type="submit" class="like-button">
+            👍 Like (<span th:text="${article.likes.size()}"></span>)
+        </button>
+    </form>
+
+    <!-- ✅ Show Edit/Delete Buttons Only If User is the Author -->
+    <div th:if="${loggedUsername != null and loggedUsername == article.author}" style="text-align: right; margin-bottom: 20px;">
+        <a th:href="@{/boards/{boardId}/articles/{articleId}/edit(boardId=${boardId}, articleId=${article.id})}" class="btn btn-primary">Edit</a>
+        <a th:href="@{/boards/{boardId}/articles/{articleId}/delete(boardId=${boardId}, articleId=${article.id})}" class="btn btn-danger">Delete</a>
+    </div>
+    </div>
+    <!-- Article Content -->
+    <div class="article-content">
+        <p th:text="${article.content}"></p>
+    </div>
+
+    <!-- ✅ Comments Section -->
+    <div class="comment-section">
+        <div th:insert="comments/_comments.html"></div>
+    </div>
+
+    <!-- ✅ "Go to Article List" Button -->
+    <a th:href="@{/boards/{boardId}/articles(boardId=${boardId})}" class="btn btn-secondary">Go to Article List</a>
+</div>
+
+<!-- ✅ Notification Popup -->
+<div id="notification" class="notification" style="display: none;">
+    <p id="notification-text"></p>
+</div>
+
+<!-- ✅ JavaScript for Showing Popup -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let message = "[[${likeMessage}]]"; // ✅ Retrieve flash message
+
+        if (message && message !== "null") {
+            showNotification(message);
+        }
+    });
+
+    function showNotification(text) {
+        let notification = document.getElementById("notification");
+        let notificationText = document.getElementById("notification-text");
+
+        notificationText.innerText = text;
+        notification.style.display = "block";
+
+        // ✅ Hide after 3 seconds
+        setTimeout(() => {
+            notification.style.display = "none";
+        }, 3000);
+    }
+</script>
+
+<!-- ✅ Add CSS for Popup Notification -->
+<style>
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+</style>
+
+
+
+</body>
+</html>
