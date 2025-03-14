@@ -73,3 +73,30 @@ button {
     color: #666;
     margin: 0 10px;
 }
+
+.profile-container p {
+    font-family: 'Arial' , sans-serif;
+    font-size: 16px;
+    color: #333;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.profile-container label {
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    color: #333;
+    text-align: left;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.profile-container input {
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    padding: 8px;
+    width: 100%;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
